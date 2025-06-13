@@ -34,14 +34,26 @@ def transcript(url):
     try:
         video_id = get_video_id(url)
         print(f"[DEBUG] Extracted Video ID: {video_id}")
-        transcript_data = scriptapi.get_transcript(video_id, languages=('en'))
-        print(f"[DEBUG] Transcript data: {transcript_data[:2]}")
+        
+        # Get available transcripts
+        transcript_list = scriptapi.list_transcripts(video_id)
+
+        # Try to fetch manually created English transcript
+        try:
+            transcript_obj = transcript_list.find_manually_created_transcript(['en'])
+            print("[INFO] Using manually created English transcript.")
+        except:
+            # Fallback: use auto-generated English transcript
+            transcript_obj = transcript_list.find_generated_transcript(['en'])
+            print("[INFO] Using auto-generated English transcript.")
+
+        transcript_data = transcript_obj.fetch()
 
         with open("data/transcript.txt", 'w', encoding='utf-8') as f:
             for entry in transcript_data:
-                start_time = entry['start']
+                start_time = entry.start
                 formatted_time = format_time(start_time)
-                text = entry['text']
+                text = entry.text
                 f.write(f"{formatted_time} : {text}\n")
 
         print("Transcript saved.")
