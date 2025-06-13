@@ -1,0 +1,4190 @@
+0:00:00 : ever wanted to build your very own face
+0:00:01 : detection model well in this video we're
+0:00:03 : going to be doing exactly that using a
+0:00:05 : deep object detection model ready to do
+0:00:07 : it let's get to it
+0:00:10 : [Music]
+0:00:28 : [Music]
+0:00:34 : [Music]
+0:00:38 : what's happening guys my name is
+0:00:39 : nicholas renaud and in this tutorial we
+0:00:41 : are going to be doing exactly what i
+0:00:43 : said at the start building our very own
+0:00:45 : face detection model now the cool thing
+0:00:47 : about this is that it is actually based
+0:00:49 : on an object detection architecture so
+0:00:51 : if you wanted to go and use this for
+0:00:52 : something else
+0:00:53 : maybe detecting different types of
+0:00:55 : objects you'd actually be able to use
+0:00:57 : this pipeline to do exactly that now in
+0:00:59 : this tutorial we're going to be going
+0:01:00 : through a bunch of stuff and as per
+0:01:02 : usual we're going to be doing it with a
+0:01:04 : client and developer relationship so
+0:01:06 : you're going to see the client
+0:01:07 : conversations as we go through it
+0:01:09 : but specifically we are first up going
+0:01:11 : to start out by collecting a bunch of
+0:01:12 : images using opencv and labeling them
+0:01:15 : using a new library called label me
+0:01:17 : but the real kicker is we are going to
+0:01:20 : be performing image augmentation so
+0:01:22 : we're going to be using a different
+0:01:23 : library for that and i'm going to talk
+0:01:25 : about that a little bit later in section
+0:01:26 : two we're going to annotate it and then
+0:01:28 : build up our deep learning model from
+0:01:30 : scratch i'm going to show you how to
+0:01:32 : actually build this deep learning model
+0:01:33 : for object detection then we're going to
+0:01:35 : test it out ready to do it let's get to
+0:01:38 : it
+0:01:41 : so
+0:01:42 : nick i tried your object detection
+0:01:44 : course but i
+0:01:46 : got some errors uh how many a million a
+0:01:49 : million a million well look how about we
+0:01:52 : go on ahead and do it from scratch no
+0:01:53 : wait really yeah well the first thing
+0:01:55 : that we need to do is get some data and
+0:01:57 : label it for this particular use case we
+0:01:59 : are going to be detecting our face using
+0:02:01 : bounding box detection this means that
+0:02:03 : you'll be able to capture where your
+0:02:04 : head
+0:02:05 : is in the frame nice what are some of
+0:02:08 : the use cases for this well you could
+0:02:09 : use it for facial sentiment analysis or
+0:02:12 : facial verification but keep in mind
+0:02:14 : that this is a generic object detection
+0:02:16 : pipeline so as long as you have one type
+0:02:18 : of object you could actually use this
+0:02:20 : flow for just about anything cool let's
+0:02:22 : do it alrighty welcome on back to the
+0:02:24 : breakdown board if i sound a little bit
+0:02:26 : stressed this is because this is the
+0:02:28 : sixth time attempting to try to record
+0:02:30 : this breakdown board i'm gonna cross my
+0:02:32 : fingers and hope all of this tech works
+0:02:34 : so in this video we are going to be very
+0:02:37 : much doing an object detection model
+0:02:39 : type tutorial but we are going to be a
+0:02:42 : little bit more practical and actually
+0:02:43 : do a face detection model so
+0:02:46 : the first thing that we are going to be
+0:02:47 : doing is we are going to be collecting
+0:02:49 : some images using our webcam
+0:02:52 : now from these images what we're
+0:02:54 : actually going to do is then begin
+0:02:56 : annotating so we are going to take our
+0:02:58 : images
+0:02:59 : let's just imagine we have some luscious
+0:03:02 : mountains in the background and the sun
+0:03:04 : shining and we have ourselves
+0:03:08 : now by annotation what i actually mean
+0:03:10 : is we're going to be drawing a bounding
+0:03:11 : box so we'll be drawing a bounding box
+0:03:13 : around our head so this will look a
+0:03:15 : little bit like this
+0:03:18 : and in order to do that we're actually
+0:03:20 : going to be using a library called label
+0:03:22 : me
+0:03:24 : so in the past for object detection
+0:03:26 : tutorials i've used a library called
+0:03:28 : label me but i actually not used label
+0:03:30 : me i've actually used a library called
+0:03:32 : label image what i found is label me is
+0:03:34 : really really powerful because it allows
+0:03:35 : you to do more than just bounding box
+0:03:37 : annotation if you wanted to do key point
+0:03:39 : annotation or if you wanted to do
+0:03:41 : segmentation you could actually use this
+0:03:43 : particular library to do just that now
+0:03:45 : let's say for example we collect maybe a
+0:03:47 : hundred ish images
+0:03:49 : that's probably not going to be enough
+0:03:51 : to actually train out a deep learning
+0:03:53 : model and this is where data
+0:03:54 : augmentation comes in for this we're
+0:03:56 : going to be using a library called
+0:03:58 : arbumentations i think that's how you
+0:04:00 : pronounce it don't quote me on that but
+0:04:02 : what that is going to allow us to do is
+0:04:04 : take our data set
+0:04:05 : and apply random cropping
+0:04:08 : apply random changes to brightness apply
+0:04:10 : random flips and apply random gamma
+0:04:12 : shifts and rgb shifts this is going to
+0:04:14 : mean that we can take our base data set
+0:04:16 : and flesh it out so that we have over 30
+0:04:19 : times the amount of data which is going
+0:04:21 : to take us let's say from 100 to 3 000
+0:04:24 : images which should effectively be
+0:04:26 : enough to actually build up our deep
+0:04:27 : learning model now this library is
+0:04:29 : really really powerful because it not
+0:04:31 : only augments your images it also does
+0:04:33 : your annotations at the same time if you
+0:04:35 : imagine when you do a crop on your data
+0:04:38 : set let's say for example our full image
+0:04:39 : was this if i actually crop it out there
+0:04:41 : our bounding box coordinates actually
+0:04:44 : need to change right so we actually need
+0:04:45 : to shift those over albumentations
+0:04:48 : actually does that for you so it's super
+0:04:49 : super powerful and super super useful
+0:04:52 : now once we've got our images and once
+0:04:54 : we've got our annotations and once we've
+0:04:56 : augmented them then it's time to
+0:04:58 : actually train our deep learning model
+0:04:59 : now if you think about what an object
+0:05:01 : detection model is it's really two
+0:05:03 : different types of models it's a
+0:05:04 : classification model which is trying to
+0:05:06 : classify what the type of object is our
+0:05:09 : particular case is just going to be one
+0:05:10 : class which is our face and the second
+0:05:12 : part is actually a regression model
+0:05:14 : trying to estimate the coordinates of
+0:05:15 : that particular bounding box now we only
+0:05:17 : really need two coordinates to draw a
+0:05:19 : box we need the top left or the top
+0:05:22 : right and we need the bottom left or the
+0:05:24 : bottom right so if as long as we get two
+0:05:26 : opposing sets of coordinates we can
+0:05:27 : actually use those to draw a bounding
+0:05:29 : box
+0:05:30 : now before we actually go and train our
+0:05:32 : deep learning model we need to define
+0:05:34 : the losses so for our classification
+0:05:36 : component it's going to be a binary
+0:05:38 : cross entropy loss which is pretty
+0:05:39 : common when it comes to actually doing a
+0:05:42 : classification model so this is going to
+0:05:43 : be doing the face classification
+0:05:47 : so that's our loss for that and then the
+0:05:49 : second loss that we actually need is our
+0:05:51 : localization loss so what we're actually
+0:05:53 : going to be doing is estimating how far
+0:05:56 : off our predictions were from actually
+0:05:58 : drawing that box now we are going to do
+0:06:00 : it slightly differently so we're going
+0:06:02 : to take a look at a top coordinate and
+0:06:04 : find out how far off our prediction was
+0:06:06 : from that and this is what this
+0:06:07 : component of the loss is doing here so
+0:06:10 : you can see we're taking our
+0:06:11 : x-coordinate and comparing it to the
+0:06:12 : predicted and our y-coordinate and
+0:06:14 : comparing it to our predicted so that's
+0:06:16 : the first component then the second
+0:06:18 : component of this loss is actually
+0:06:19 : evaluating the width and height of that
+0:06:22 : particular bounding box so what we're
+0:06:24 : going to do is we're going to compare
+0:06:25 : our true value versus our predicted
+0:06:27 : value so we're going to compare that for
+0:06:28 : our width and then we're also going to
+0:06:30 : do it for our height and that is what
+0:06:32 : these two parts of this loss are doing
+0:06:34 : so if you think about our localization
+0:06:36 : loss this is ensuring that our box is as
+0:06:39 : close to possible or close to
+0:06:40 : representing our object as possible so
+0:06:43 : once we've actually gone and defined
+0:06:44 : those losses we're actually going to use
+0:06:45 : the keras functional api to build up our
+0:06:48 : model
+0:06:49 : now we're actually going to be using a
+0:06:50 : vgg 16 model which is a classification
+0:06:54 : model for images now the beauty of this
+0:06:56 : is that it's been pre-trained on a ton
+0:06:58 : of data already so we can actually just
+0:07:00 : use it inside of our model and add in
+0:07:02 : our final two layers which are going to
+0:07:04 : be our classification model and our
+0:07:06 : regression model to be able to give us
+0:07:08 : our bounding boxes
+0:07:09 : so
+0:07:10 : once we've gone and built up that model
+0:07:12 : what we'll get out of this model is
+0:07:15 : six different values so our third well
+0:07:17 : actually no five different values so our
+0:07:19 : first set of values is going to be
+0:07:20 : either a zero or one it's not going to
+0:07:22 : be both of those it's going to be a
+0:07:24 : range within that value and that's going
+0:07:26 : to represent whether or not a face has
+0:07:28 : been detected within our particular
+0:07:30 : image and then the second set of values
+0:07:32 : is going to be a set of four values
+0:07:34 : and this is going to be x1
+0:07:36 : y1
+0:07:38 : x2
+0:07:40 : y2 which represents the coordinates for
+0:07:43 : our box so we'll actually get five
+0:07:45 : outputs out of this model which we can
+0:07:46 : then use to be able to do detections so
+0:07:49 : once we've gone and trained that we'll
+0:07:50 : actually go and test it out in real time
+0:07:52 : and we'll make detections which will
+0:07:54 : effectively be able to go and detect
+0:07:58 : our face
+0:07:59 : and that in a nutshell is the breakdown
+0:08:01 : board over let's jump on over and get to
+0:08:03 : coding alrighty guys so face detection
+0:08:06 : so in order to go through this i've gone
+0:08:08 : and written a ton of code which you're
+0:08:11 : going to be able to leverage and if you
+0:08:13 : want to go through this code yourself it
+0:08:15 : is all available on my github repo so
+0:08:18 : you just need to go to
+0:08:20 : knick knock knack forward slash face
+0:08:22 : detection and it is all there now whilst
+0:08:24 : i've called it face detection what we're
+0:08:27 : really dealing with here is an end to
+0:08:30 : end object detection pipeline because
+0:08:32 : we're actually going to be doing
+0:08:33 : bounding box detection which you'll see
+0:08:35 : in a second so first things first what
+0:08:38 : is it that we need to go on ahead and do
+0:08:41 : well let's actually take a look at our
+0:08:42 : pipeline
+0:08:43 : so first things first we're going to
+0:08:44 : deal with section one setting up and
+0:08:47 : getting our data as well as doing a
+0:08:49 : little bit of annotation so first things
+0:08:51 : first we need to go and install some
+0:08:53 : dependencies so if we open this up we
+0:08:55 : can see that we have
+0:08:57 : one two three four five six different
+0:08:59 : dependencies that we need to go and
+0:09:01 : install inside of our python environment
+0:09:03 : now if you don't know how to work with
+0:09:05 : jupyter or you don't know how to set up
+0:09:06 : custom environments by all means go and
+0:09:09 : check out the deep learning beginners
+0:09:11 : tutorial i'll show you how to get all of
+0:09:12 : this set up so effectively you will be
+0:09:14 : starting where i'm showing you right now
+0:09:17 : cool so first things first we've got to
+0:09:18 : go and install a bunch of stuff so we
+0:09:20 : need to run exclamation mark pip
+0:09:23 : which is a standard python installation
+0:09:25 : so pip install we're going to be
+0:09:27 : installing label me let me actually show
+0:09:29 : this so label me
+0:09:32 : so this is quite possibly my one of my
+0:09:34 : favorite libraries that i've dealt with
+0:09:35 : lately so this allows you to do a ton of
+0:09:37 : different types of annotation and we'll
+0:09:39 : probably be exploring this a ton more in
+0:09:41 : the upcoming
+0:09:43 : deep learning series or wherever we're
+0:09:44 : going with this stuff so we're going to
+0:09:46 : be using labelme for our annotations
+0:09:48 : tensorflow and tensorflow gpu so our
+0:09:50 : friends are going to be helping us with
+0:09:52 : deep learning
+0:09:53 : opencv python so this is going to be
+0:09:55 : used for real-time detection as well as
+0:09:57 : capturing images which you'll see over
+0:09:59 : here we're also going to be using
+0:10:00 : matplotlib and this is really to do our
+0:10:02 : rendering so right about here we'll be
+0:10:04 : using matplotlib and then albumentation
+0:10:07 : this is a new one so this is what we're
+0:10:09 : going to be using to do our data
+0:10:11 : augmentation so the nice thing about
+0:10:13 : this is that if you go into the
+0:10:14 : documentation and again i'll link to
+0:10:16 : this in the description below
+0:10:18 : so if you actually go down
+0:10:20 : there's actually a walkthrough to do
+0:10:22 : bounding box augmentation now i
+0:10:24 : mentioned it in the
+0:10:26 : breakdown board so a really important
+0:10:28 : thing when you're doing data
+0:10:29 : augmentation for
+0:10:30 : deep learning and specifically for
+0:10:32 : object detection is that you not only
+0:10:33 : need to augment the images if you start
+0:10:35 : cropping the images you need to augment
+0:10:37 : the labels and albumentations actually
+0:10:40 : does that for you absolutely
+0:10:42 : fantastic cool
+0:10:44 : so let's go ahead and run this install
+0:10:46 : so we're going to be installing label me
+0:10:47 : tense flow opencv dash python map plot
+0:10:50 : label and augmentation so if we scroll
+0:10:52 : on down doesn't look like we've got any
+0:10:55 : errors there so that is our first
+0:10:57 : line of code successfully run so we've
+0:10:59 : now successfully gone and installed our
+0:11:01 : dependencies and set those up now the
+0:11:04 : next thing that we need to do is
+0:11:05 : actually go and
+0:11:06 : collect some images so in order to do
+0:11:09 : this we need to import
+0:11:10 : four different libraries so first up
+0:11:12 : we're going to be importing os and i've
+0:11:14 : talked about this a lot before so os
+0:11:16 : just makes it a lot easier to navigate
+0:11:17 : through different file paths so if you
+0:11:19 : need to
+0:11:20 : join file paths together if you need to
+0:11:22 : list stuff inside of directories os is
+0:11:23 : your friend so that line is import os
+0:11:27 : the second line is import time so when
+0:11:29 : we actually go and collect our images we
+0:11:31 : want to give ourselves a little bit of
+0:11:32 : time to move around and that is exactly
+0:11:34 : what this time library over here is
+0:11:36 : going to help us do we are then going to
+0:11:38 : be importing uuid so the nice thing let
+0:11:41 : me actually show you what uuid does so
+0:11:43 : uuid actually allows you to create a
+0:11:45 : unique identifier a unique uniform
+0:11:47 : unique identifier so if i type in uuid
+0:11:49 : dot
+0:11:51 : uuid one
+0:11:55 : this gives us a specific uniform
+0:11:57 : identifier so you can see that that is
+0:11:59 : that identifier there this allows us to
+0:12:01 : create unique file names for our images
+0:12:03 : rather than going
+0:12:04 : image one image two image three blah
+0:12:07 : blah so on we're gonna use this to make
+0:12:09 : us look a little bit more professional
+0:12:11 : so uh this allows you to create uniform
+0:12:13 : unique identifiers so that's uuid and
+0:12:16 : then opencv
+0:12:17 : by now if you're doing object detection
+0:12:19 : you've probably heard about opencv a
+0:12:21 : bunch so opencv allows us to work with
+0:12:24 : different sensors different cameras just
+0:12:25 : makes our lives a whole bunch easier in
+0:12:27 : order to do computer vision so those are
+0:12:30 : our four dependencies now imported
+0:12:33 : the next thing that we need to do is go
+0:12:35 : and define some paths so our images are
+0:12:38 : going to go inside of a folder called
+0:12:39 : data and we're going to specifically put
+0:12:41 : them inside of a additional folder
+0:12:43 : called images so we're going to specify
+0:12:45 : this for now so let's actually tweak
+0:12:47 : this so it's going to be os.path and
+0:12:49 : we're going to put it inside of data and
+0:12:50 : inside a folder called images
+0:12:53 : and the number of images that we're
+0:12:54 : actually going to collect
+0:12:56 : is
+0:12:57 : i've got 10 there but we really need
+0:12:59 : more than that so we'll probably collect
+0:13:01 : 100 to be honest it's going to take a
+0:13:03 : while to annotate these but i want to
+0:13:05 : show you antenna pipeline so let's
+0:13:07 : actually collect
+0:13:10 : let's collect 20 to begin with and then
+0:13:13 : what i might do is move the camera a
+0:13:14 : little bit collect another 20 move the
+0:13:16 : camera a little bit more collect another
+0:13:17 : 20 i don't know maybe change my shirt so
+0:13:19 : that we've got different samples so
+0:13:21 : ideally you want as much variability in
+0:13:23 : these types of data sets that you're
+0:13:24 : collecting let's collect 30 to begin
+0:13:25 : with and then we'll do 30 30 30. okay so
+0:13:28 : uh data is going to be uh oh we're still
+0:13:31 : part uh this should be osophatojon
+0:13:34 : so our images are going to go into a
+0:13:35 : folder called data and then images and
+0:13:37 : we're going to collect 30 images to
+0:13:39 : begin with now we first up actually need
+0:13:41 : to create these folder structures so if
+0:13:43 : we go into
+0:13:44 : our repositories i'm working inside of
+0:13:46 : jupyter lab so nice thing about this
+0:13:48 : just makes it a little bit easier to
+0:13:49 : navigate through our file structures i'm
+0:13:51 : going to create a folder in here and i'm
+0:13:52 : going to call it data
+0:13:54 : and then inside of data i'm going to
+0:13:55 : create another folder and i'm going to
+0:13:57 : call that images
+0:13:58 : and i'm going to create another folder
+0:13:59 : and i'm going to call it labels so this
+0:14:02 : is going to be where we store our raw
+0:14:04 : data and our unpartitioned data so
+0:14:07 : in a couple of seconds once we get into
+0:14:09 : partitioning or a little bit later on
+0:14:11 : once we get into partitioning we're
+0:14:12 : actually going to create three
+0:14:14 : additional folders so train test and val
+0:14:17 : and we'll actually split up our data
+0:14:19 : manually so um there is a way to do it
+0:14:21 : automatically but to be honest i was
+0:14:23 : running out of time to get this tutorial
+0:14:25 : done this actually took me five days to
+0:14:26 : write in total
+0:14:28 : if you have a better way to split it up
+0:14:30 : let me know um but for now we will just
+0:14:32 : know that you need an images folder and
+0:14:33 : a labels folder inside of a data folder
+0:14:35 : so this is my top repository if i go
+0:14:37 : into data i've got a folder called
+0:14:39 : images blank right now and inside of
+0:14:40 : there i've got a folder called labels
+0:14:42 : also blank right now
+0:14:44 : now what we're going to do is we are
+0:14:45 : going to collect a bunch of images so
+0:14:48 : let's walk through this so the first
+0:14:50 : line is establishing a connection to our
+0:14:52 : video camera so again if you've seen any
+0:14:54 : of my computer vision videos before this
+0:14:57 : would be pretty familiar to you so it's
+0:14:59 : cap equals cv2.video capture and then we
+0:15:01 : need to pass through our camera number
+0:15:04 : so
+0:15:05 : i think a lot of you have had problems
+0:15:06 : with this before when
+0:15:08 : you are passing through this number you
+0:15:10 : need to you might need a test right so
+0:15:11 : the number for your particular webcam or
+0:15:14 : your particular video capture device
+0:15:16 : might differ right so the one that i'm
+0:15:18 : recording this tutorial on right now is
+0:15:19 : video capture device zero i believe and
+0:15:22 : the one that we're going to be recording
+0:15:24 : our or capturing our images for i think
+0:15:26 : is video capture device one but we're
+0:15:27 : gonna test this out and see if it works
+0:15:29 : worst case scenario if it doesn't work
+0:15:30 : you just rerun it change the video
+0:15:32 : capture device number and and keep
+0:15:33 : testing until you get that right capture
+0:15:35 : number
+0:15:36 : so
+0:15:37 : that's our video capture device then
+0:15:38 : we're going to be looping through our
+0:15:40 : range of images so we are going to be
+0:15:41 : collecting 30 images so we have written
+0:15:44 : four image num in range and then these
+0:15:47 : number of images that we're going to be
+0:15:49 : collecting so effectively we're just
+0:15:50 : writing a loop so for image
+0:15:53 : num in range 30
+0:15:57 : print
+0:15:59 : image num
+0:16:01 : right so we're just going through 30
+0:16:02 : different images we're going to collect
+0:16:04 : 30 to be in with right so it's just a
+0:16:05 : basic loop
+0:16:07 : then we're going to print out that we're
+0:16:08 : collecting image and we're going to
+0:16:10 : print out which image number we're up to
+0:16:12 : we're going to read from our capture
+0:16:14 : device so again this is common to a
+0:16:16 : opencv image collection pipeline so
+0:16:19 : we're going to get a return value to
+0:16:21 : whether or not we've successfully gone
+0:16:22 : and captured something as well as the
+0:16:24 : frame itself so red comma frame equals
+0:16:27 : cap dot read so it's going to capture
+0:16:29 : the frame and it's going to allow us to
+0:16:31 : write it down using cv2 dot i am right
+0:16:34 : so this just defines the name of the
+0:16:37 : file that we're actually going to be
+0:16:38 : passing through and we are passing
+0:16:40 : through the images path which is what we
+0:16:41 : defined up here so it should go data
+0:16:43 : images and then a unique file name which
+0:16:46 : is based on uuid one as i mentioned
+0:16:48 : before then we're going to write it out
+0:16:50 : using cv2 dot i'm right and we're also
+0:16:52 : going to show it back to the screen so
+0:16:54 : we can see it now we're also using that
+0:16:56 : time library that i mentioned up here so
+0:16:58 : we're going to sleep for i believe it's
+0:17:00 : half a second between each frame so this
+0:17:01 : gives us a little bit of time to move
+0:17:03 : around maybe move our head in around the
+0:17:06 : frame move it out of the screen because
+0:17:08 : we also want to capture a couple of
+0:17:09 : frames with our face not in it so this
+0:17:12 : gives us some negative samples
+0:17:14 : particularly important for our
+0:17:15 : classifier component of our deep
+0:17:17 : learning model
+0:17:18 : and then all of this stuff down here is
+0:17:20 : really just our usual cv to break code
+0:17:23 : that allows us to break out of the loop
+0:17:25 : okay so that is looking pretty good for
+0:17:27 : now so let's actually go on ahead
+0:17:30 : and run this
+0:17:32 : actually i'm going to take down the
+0:17:33 : green screen so that way we don't have
+0:17:35 : like we have a little bit of noise in
+0:17:36 : our background rather than just a
+0:17:38 : straight green screen makes it a little
+0:17:39 : bit too easy for our deep learning model
+0:17:43 : all right so that is the green screen
+0:17:45 : now down
+0:17:47 : i mean that actually looks pretty good
+0:17:48 : in the recording over the green screen
+0:17:50 : all right uh let's actually go and run
+0:17:52 : this so we should get a little pop up
+0:17:53 : towards the bottom of our screen
+0:17:54 : assuming everything is working okay
+0:17:59 : there we go all right so you can see
+0:18:01 : that so i'm just going to move around
+0:18:02 : let's move this out of the way
+0:18:07 : i'm also going to jump out of the screen
+0:18:08 : completely
+0:18:16 : all right
+0:18:17 : so let's actually take a look inside of
+0:18:18 : our images folder so it looks like we've
+0:18:20 : got a bunch of images
+0:18:22 : beautiful
+0:18:24 : i don't like that we've got the mic in
+0:18:25 : there that's fine
+0:18:30 : we've got a couple without so you can
+0:18:32 : see that we've got a couple with
+0:18:33 : ourselves out of the frame as well
+0:18:35 : looking good okay
+0:18:37 : so that's our first 30 but again we
+0:18:40 : probably want a lot more so
+0:18:43 : now in this set that we collect we might
+0:18:45 : move a little bit further back
+0:18:47 : and collect another 30. so let's
+0:18:49 : actually just
+0:18:51 : let me actually see
+0:18:54 : that green screen back all right let's
+0:18:55 : actually collect another 30. and again
+0:18:58 : if you've already got images collected
+0:18:59 : you can just annotate those as well
+0:19:01 : another key point to note
+0:19:03 : let's collect another 30.
+0:19:07 : i'm moving around it hasn't even popped
+0:19:09 : up yet okay there we go
+0:19:11 : boom move over to here
+0:19:14 : over here
+0:19:16 : completely out of the frame
+0:19:21 : move over here
+0:19:24 : so close
+0:19:28 : let's actually do a couple where we're
+0:19:29 : kind of close to the screen as well
+0:19:36 : i covered my face a little bit
+0:19:41 : alrighty so that's 90 images now or it
+0:19:43 : should be 90 images actually go and take
+0:19:46 : a look
+0:19:50 : how much shade do we have so if we go
+0:19:51 : into images let's see
+0:19:54 : we have 90 images okay i think that's
+0:19:56 : probably going to be enough to begin
+0:19:57 : with let's see
+0:20:00 : bring the green screen
+0:20:04 : back okay
+0:20:06 : um all right so we've got images so
+0:20:08 : we've got this i pi mb checkpoints we
+0:20:11 : i'm going to delete that out of there
+0:20:12 : because we don't really need it and then
+0:20:13 : if we go into labels we still don't have
+0:20:16 : anything
+0:20:17 : so how we doing so far so we've got
+0:20:19 : images where are we up to
+0:20:21 : so we have successfully gone and set up
+0:20:23 : and got some data we've installed our
+0:20:25 : dependencies we've now gone and
+0:20:26 : collected 90 different images
+0:20:29 : and now what we're going to want to do
+0:20:30 : is label those so
+0:20:33 : what we're going to do is we are going
+0:20:34 : to annotate those images using a library
+0:20:36 : called label me so if i go and run
+0:20:38 : exclamation mark label me this is going
+0:20:41 : to trigger the label me annotation
+0:20:43 : software or package right now again you
+0:20:46 : can run this from a command prompt so if
+0:20:47 : you open up a command prompt you
+0:20:49 : activate your environment and run
+0:20:50 : labelme at the command line this will
+0:20:52 : allow you to do it but assuming you've
+0:20:54 : got it installed from over here you
+0:20:56 : should be able to successfully use it if
+0:20:58 : you get stuck go and take a look at the
+0:21:00 : documentation because there is a bunch
+0:21:03 : so really all you need to do is go to
+0:21:04 : the command line run pip install label
+0:21:06 : me and then go to the whatever command
+0:21:08 : line you're using well i'm using windows
+0:21:10 : over here so it's really pip install
+0:21:11 : label me and then you run label me to
+0:21:13 : start it right i'm doing it inside of a
+0:21:16 : jupiter notebook because i want it to be
+0:21:18 : inside of a jupiter notebook but you
+0:21:19 : sort of get the idea so if we go and run
+0:21:20 : this
+0:21:21 : we should get label me popping up
+0:21:23 : towards the bottom here
+0:21:25 : and there you go
+0:21:26 : and what i'm going to do is we are going
+0:21:29 : to open up the directory with our images
+0:21:31 : so we can actually over here i don't
+0:21:33 : know if i can zoom into this
+0:21:35 : so open over here you can see it says
+0:21:37 : opendr
+0:21:39 : so we can actually open that directory
+0:21:41 : go into our data folder go into our
+0:21:42 : images folder and select our folder and
+0:21:45 : look at that we got our images that we
+0:21:46 : just collected
+0:21:48 : so the other thing that we want to do is
+0:21:50 : we want to change where our labels are
+0:21:52 : going to be saved to because what we're
+0:21:53 : effectively doing is we're creating
+0:21:55 : labels now right pretty awesome part of
+0:21:57 : the deep learning process
+0:21:59 : so what we're going to do is hit file
+0:22:01 : and then we are going to hit change
+0:22:03 : output directory
+0:22:04 : and i'm going to choose the labels
+0:22:06 : folder
+0:22:08 : the this isn't going to break anything
+0:22:10 : the only thing that's going to happen if
+0:22:11 : you don't change the
+0:22:12 : annotation folder or the output folder
+0:22:14 : it's going to save your annotation to a
+0:22:16 : different folder you just need to move
+0:22:17 : them around not no biggie right so i'm
+0:22:20 : going to choose that folder then the
+0:22:21 : other thing that i'm going to do and
+0:22:22 : this is going to save us a bit of time
+0:22:23 : is if you go to file
+0:22:25 : save automatically it's automatically
+0:22:27 : going to save those annotations so you
+0:22:29 : don't need to hit save every single time
+0:22:30 : just going to make your life a bit
+0:22:32 : easier
+0:22:33 : okay so that is the beginnings of this
+0:22:36 : look how nice that plant looks that's a
+0:22:38 : nice plant i don't know what it is we've
+0:22:40 : got it randomly okay so that is our
+0:22:43 : those are our images what we now need to
+0:22:45 : do is annotate so what we can do is just
+0:22:47 : go over to here
+0:22:48 : or over to edit hit create rectangle and
+0:22:51 : then you're going to get this little
+0:22:52 : crosshair symbol
+0:22:54 : to annotate all you need to do is click
+0:22:56 : the starting point for the bounding box
+0:22:58 : and then click again so if i click you
+0:23:00 : can see i've got a little green thing
+0:23:03 : and if i draw the box look at that
+0:23:06 : and then click again and it's going to
+0:23:08 : ask me to name what type of class this
+0:23:11 : is and i'm just going to name it face
+0:23:13 : i don't know if you can see that you can
+0:23:15 : see i've just written face because we're
+0:23:17 : only going to have one class and then
+0:23:18 : we're going to hit ok and that is our
+0:23:20 : annotation then if i hit d on my
+0:23:22 : keyboard it's going to allow me to loop
+0:23:24 : through each one of these so again i can
+0:23:26 : draw another bounding box
+0:23:28 : face
+0:23:30 : this one's a bit blurry but we'll do it
+0:23:31 : nonetheless
+0:23:33 : bass so again all i'm doing is i'm
+0:23:35 : clicking drawing and bounding box
+0:23:38 : hitting okay
+0:23:40 : clicking drawing a bounding box around
+0:23:42 : my head okay clicking
+0:23:46 : growing bounding box okay and i'm just
+0:23:48 : going to keep going so for the
+0:23:50 : images where we don't actually have a
+0:23:53 : face in the frame we're actually going
+0:23:55 : to do nothing so i've actually set up
+0:23:57 : this code so that it will allow us to
+0:23:59 : handle
+0:24:00 : images where we don't have any examples
+0:24:03 : and even though the mic is in the frame
+0:24:05 : there we'll do it
+0:24:07 : i'm just going to keep doing it so again
+0:24:09 : so all i'm doing is i'm clicking to
+0:24:11 : begin the annotation
+0:24:13 : drawing the annotation clicking to end
+0:24:15 : the annotation and then hitting ok and
+0:24:18 : then i'm hitting d to go to the next
+0:24:19 : image
+0:24:20 : click
+0:24:22 : draw
+0:24:23 : click again
+0:24:25 : next all right so for this one i'm going
+0:24:27 : to draw like it's going to be a bit
+0:24:28 : sketchy but i'm basically going to do
+0:24:30 : that
+0:24:32 : so we've at least got part all right so
+0:24:34 : for this one our face isn't in the frame
+0:24:36 : so i'm actually gonna skip that
+0:24:38 : so that means there'll be no annotation
+0:24:40 : for that particular file but that's fine
+0:24:42 : the code is actually set up to handle
+0:24:43 : that
+0:24:44 : all right so i've drawn so bounding box
+0:24:46 : there
+0:24:49 : bounding box there
+0:24:52 : bounding box there
+0:24:54 : this is a close-up bounding box
+0:25:00 : landing box
+0:25:02 : and the cool thing about this is that
+0:25:04 : like once you've gone to the effort of
+0:25:06 : oh hold on no this is not d
+0:25:08 : delete that
+0:25:12 : want face boom
+0:25:17 : bass
+0:25:18 : how do we delete that annotation now
+0:25:20 : that i've screwed that up uh that's fine
+0:25:22 : we'll leave it
+0:25:24 : we'll review
+0:25:27 : boom base
+0:25:32 : we delete that uh edit polygons
+0:25:38 : so you can see that i've accidentally
+0:25:40 : created a label list there with the d i
+0:25:42 : don't know if that's gonna let's
+0:25:43 : actually just quickly review our
+0:25:44 : annotations actually this is a good
+0:25:45 : point to to go and review
+0:25:47 : so we've gone and started annotating
+0:25:49 : what you'll actually see is if you go
+0:25:51 : into
+0:25:53 : uh the labels folder because that's
+0:25:55 : where we've pointed our annotation so if
+0:25:56 : we go into data and then labels you can
+0:25:58 : see we've got all these json files now
+0:26:00 : let's take a look at the last one
+0:26:01 : because
+0:26:02 : just want to make sure so this is what
+0:26:04 : it looks like
+0:26:06 : looking it's looking okay all right so
+0:26:07 : you can see that this is what an
+0:26:09 : annotation looks like so we've got the
+0:26:10 : version i believe of label me any flags
+0:26:13 : we've also got the shape so this over
+0:26:15 : here is what actually represents our
+0:26:17 : annotation so you can see that our label
+0:26:19 : is saying face and it's actually got the
+0:26:21 : points so these are the coordinates for
+0:26:22 : our frame so i believe it'll be what
+0:26:25 : will it be so it should be
+0:26:27 : the width first and then the height and
+0:26:31 : then the so this will be point the first
+0:26:33 : point at the top this will be the second
+0:26:34 : point at the bottom
+0:26:36 : cool
+0:26:37 : all right so these are our annotations
+0:26:39 : so that doesn't look like adding that
+0:26:41 : uh that oh hold on this one's got d
+0:26:44 : let's actually clean this one up let's
+0:26:47 : take a look to see if it screwed up any
+0:26:49 : others
+0:26:50 : that one's okay
+0:26:54 : that one's okay
+0:26:56 : which one was screwed up so let's
+0:26:58 : actually go back and find that one that
+0:26:59 : we screwed up so i'm just gonna hit
+0:27:01 : there we go all right so you can see it
+0:27:02 : there i'm gonna remove that annotation
+0:27:04 : and save that so that should hopefully
+0:27:06 : fix it so that was annotation for image
+0:27:11 : 32ff8075 so these are things that happen
+0:27:13 : right like sometimes it'll screw up
+0:27:15 : you'll maybe write an incorrect
+0:27:16 : annotation i sort of wanted to show you
+0:27:18 : this rather than
+0:27:19 : make it all perfect and then you're like
+0:27:21 : nick it's not working
+0:27:22 : okay cool so that looks like we've
+0:27:24 : removed that
+0:27:25 : let's just double check it's the same
+0:27:26 : one
+0:27:28 : super small no that is not the same one
+0:27:30 : so 32 ff 805 it should be this one here
+0:27:34 : see uh
+0:27:35 : god that is a long all right let's zoom
+0:27:37 : out look at my head there
+0:27:40 : see if it's been no it's still in there
+0:27:43 : why is it not deleting
+0:27:46 : all right let's just go and do it
+0:27:47 : manually so i'm just going to step in
+0:27:52 : i think it was this one right
+0:27:55 : so i'm actually just going to delete it
+0:27:56 : manually so if we go in inside of this
+0:27:59 : i'm going to delete all of that again
+0:28:01 : this is purely optional but if you do
+0:28:03 : screw it up accidentally put an
+0:28:04 : incorrect annotation you can just delete
+0:28:06 : it out of the shapes array so you can
+0:28:07 : see that there i'm going to delete that
+0:28:10 : hit save
+0:28:14 : right so if we go and
+0:28:16 : let's go back a little
+0:28:20 : still looking good
+0:28:24 : doesn't look like it's appearing anymore
+0:28:25 : because we've gone and deleted it out
+0:28:29 : okay i think we're looking good
+0:28:31 : and again so you can just go backwards
+0:28:33 : and forwards a and d it's like the
+0:28:34 : normal wasd
+0:28:36 : okay let's keep going so again we're
+0:28:38 : going to draw another rectangle
+0:28:42 : and we're going to set it up as d
+0:28:47 : keep doing this
+0:28:49 : so we're going to set it up as face not
+0:28:51 : d
+0:28:54 : really annoying me that i have to now go
+0:28:55 : and delete let's actually save this
+0:28:57 : let's close this and see if we can
+0:28:58 : reopen it up and it's getting whether or
+0:29:00 : not it gets rid of the d bit
+0:29:03 : all right so let's open our directory so
+0:29:05 : data
+0:29:06 : images
+0:29:08 : and then if we go and open our labels
+0:29:11 : so we're going to change our output
+0:29:12 : directories to data and then we can go
+0:29:14 : into labels
+0:29:15 : all right that looks like it's got rid
+0:29:16 : of it
+0:29:17 : so you can see that we no longer have
+0:29:19 : that d
+0:29:20 : label appearing anywhere because we've
+0:29:21 : gone and deleted our app anyway okay so
+0:29:24 : these are all the ones that have gone
+0:29:25 : and successfully labeled
+0:29:28 : so just restarting label me i think
+0:29:30 : we'll pick up the new labels again all
+0:29:32 : right so let's finish this off so again
+0:29:34 : let's save automatically we're gonna go
+0:29:36 : create rectangles so let's do this so
+0:29:39 : we're going to finish it and hit face
+0:29:43 : all right i'm probably going to fast
+0:29:44 : forward through this so you'll see the
+0:29:46 : end out come so let's uh
+0:29:49 : probably speed this up
+0:30:01 : key point to note for the ones where my
+0:30:03 : face is in there but my hands are
+0:30:05 : covering it i'm actually going to leave
+0:30:06 : those in there and not label them so i'm
+0:30:08 : gonna say the face is blocked so you
+0:30:09 : can't actually see it so for this one
+0:30:11 : for this one i'm gonna leave those
+0:30:14 : so no annotation
+0:30:17 : and again i'm just trying to capture the
+0:30:18 : majority of my head as well
+0:30:22 : almost did the d error again
+0:31:17 : all righty those are all of our images
+0:31:20 : labeled so again we've got some negative
+0:31:22 : samples
+0:31:23 : got plenty of images and plenty of
+0:31:25 : annotations so again we've done 90
+0:31:27 : images and when we go and
+0:31:29 : pump this through our augmentation
+0:31:31 : pipeline we're going to get a ton more
+0:31:33 : so i don't know what should that mean
+0:31:35 : about 2 700 images
+0:31:38 : all right so we've got a ton there or
+0:31:39 : more i can't remember i can't remember
+0:31:41 : how many we go and augment but okay so
+0:31:43 : that is our set of annotations done so
+0:31:46 : what you should have is inside
+0:31:49 : of our images photo got a ton of images
+0:31:52 : and then inside of our let's take a look
+0:31:54 : so image we can open one of those up so
+0:31:56 : again a bunch of images so we haven't
+0:31:58 : actually gone and changed the image by
+0:31:59 : annotating it we're creating that
+0:32:02 : annotation inside of a separate file so
+0:32:04 : those are our images which are looking
+0:32:06 : brilliant and beautiful then if we go
+0:32:09 : into our labels
+0:32:11 : we've got our json labels so again at
+0:32:14 : the actual annotation is inside of this
+0:32:16 : shapes key here so shapes zero and then
+0:32:19 : our points represent our coordinates so
+0:32:21 : what you can see there now we've only
+0:32:23 : got one label which is going to be face
+0:32:25 : but we've got all of these different
+0:32:26 : points to represent the bounding box
+0:32:28 : coordinates for our face so we're going
+0:32:30 : to be able to use those to do our object
+0:32:32 : detection so that is our first bit now
+0:32:35 : done so we've successfully gone and set
+0:32:37 : up our implementation we've got and
+0:32:39 : collected a bunch of images and we've
+0:32:41 : gone and annotated using label me let's
+0:32:44 : jump back on over to our client and have
+0:32:45 : a chat and see what's next
+0:32:50 : so we got data now what brace yourself
+0:32:53 : we got a fair bit of data pre-processing
+0:32:55 : coming we're now going to do a few
+0:32:57 : things first we're going to take a look
+0:32:58 : at some collected samples using
+0:33:00 : matplotlib then we'll split it into a
+0:33:02 : training testing and validation
+0:33:04 : partition hold up why do we need to do
+0:33:06 : that this is best practice the model is
+0:33:08 : trained aka taught from the training
+0:33:11 : partition but at the same time we use
+0:33:14 : the validation partition to inform how
+0:33:16 : we build the neural network so if we see
+0:33:18 : the model is performing well on the
+0:33:20 : training partition but it's shaky as
+0:33:22 : hell on the validation set it might mean
+0:33:24 : that we need to try some regularization
+0:33:26 : or change our neural network
+0:33:27 : architecture what about the test set
+0:33:29 : we'll leave that bit right up until the
+0:33:30 : end to finally see how a model has
+0:33:33 : performed this should be a clear test of
+0:33:35 : performance because we haven't used it
+0:33:36 : in either our training or to determine
+0:33:39 : how the model is built ah got it what
+0:33:41 : else are we doing here a major key yeah
+0:33:44 : all right dj khaled some may say i am
+0:33:47 : the dj khaled of deep learning seriously
+0:33:50 : now we're going to apply image
+0:33:51 : augmentation to build out our data set
+0:33:53 : we'll randomly crop and adjust our
+0:33:55 : images to go from a small set of data to
+0:33:56 : something way larger in this case 30
+0:33:59 : times bigger ah sweet let's do it then
+0:34:01 : all righty and we're back so our
+0:34:03 : client's pretty happy we've gone and
+0:34:04 : collected a bunch of images of our face
+0:34:06 : and we've gone and annotated them with
+0:34:09 : label me as i showed you down there
+0:34:11 : step two so we've got a bunch of stuff
+0:34:13 : to do with this so we're gonna be going
+0:34:15 : all the way up to step seven so first up
+0:34:17 : we're gonna review our data set and
+0:34:19 : build an image loading function we're
+0:34:21 : then going to partition our unaugmented
+0:34:24 : data so we're going to be splitting out
+0:34:25 : the images and the labels that we just
+0:34:27 : collected we're then going to apply our
+0:34:29 : image augmentation and on our images and
+0:34:32 : our labels using
+0:34:34 : albumentations we're then going to build
+0:34:36 : and run that augmentation pipeline and
+0:34:38 : then we're going to prepare our labels
+0:34:40 : and combine them all so by the end of
+0:34:42 : this particular part we should
+0:34:43 : effectively have
+0:34:45 : a data pipeline so we'll have a training
+0:34:47 : testing and validation data partition
+0:34:49 : with our augmented data which has been
+0:34:51 : gone
+0:34:52 : and reshaped and pre-processed and we
+0:34:55 : should be ready to pass this through to
+0:34:57 : our deep learning model once we've gone
+0:34:58 : and done all of this
+0:35:00 : okay so first things first let's go on
+0:35:02 : ahead and kick this off by reviewing our
+0:35:04 : data set and building our image loading
+0:35:06 : function
+0:35:07 : so first things first we're going to
+0:35:08 : import a number of key dependencies so
+0:35:10 : we're going to be importing tensorflow
+0:35:12 : and in order to do that we're going to
+0:35:14 : run import tensorflow as tf so what you
+0:35:16 : can see there and tensorflow is going to
+0:35:17 : be used to build our data pipeline as
+0:35:20 : well as to
+0:35:21 : what we're going to
+0:35:22 : use it for to actually build our deep
+0:35:23 : learning model a little bit later on now
+0:35:25 : we need to import it a little bit
+0:35:27 : earlier on at least at this moment
+0:35:29 : because we need to limit the gpu memory
+0:35:30 : growth by default tensorflow is going to
+0:35:33 : expand and use all of your vram so we
+0:35:35 : need to implement uh memory growth
+0:35:37 : limitation right up here so you need to
+0:35:39 : do it pretty early we're importing cv2
+0:35:41 : again but i think we've already got it
+0:35:42 : so we don't actually need it there i can
+0:35:44 : actually take that out
+0:35:45 : so the next thing that we're going to
+0:35:46 : import is json so import json now why do
+0:35:49 : we need json well if you take a look our
+0:35:52 : labels are actually in a json format so
+0:35:55 : you can see that there so we're going to
+0:35:56 : need the json library to be able to load
+0:35:58 : those into our python pipeline then
+0:36:01 : we're going to import numpy so numpy is
+0:36:03 : going to be used to just help us with
+0:36:05 : our data pre-processing so we've written
+0:36:07 : import numpy as np
+0:36:09 : then we've imported matplotlib so from
+0:36:12 : matplotlib import pipeline as plt and
+0:36:15 : we're going to be using that down here
+0:36:16 : to actually visualize our images so
+0:36:18 : let's run those
+0:36:20 : so tensorflow does take a little bit of
+0:36:21 : time to import every now and then
+0:36:23 : keep in mind as well if you've got a gpu
+0:36:25 : this is going to train way faster so if
+0:36:27 : you want to learn how to go and set up
+0:36:29 : tensorflow for your gpu again jump back
+0:36:32 : on over to the deep learning for
+0:36:33 : beginners tutorial and i'll actually
+0:36:35 : walk you through it
+0:36:36 : all right so those are our four
+0:36:37 : dependencies now imported so again we
+0:36:39 : imported tense flow json numpy and
+0:36:41 : matplotlib the next thing that we need
+0:36:43 : to do so step 2.2 is limit our gpu
+0:36:46 : memory growth so again this is some
+0:36:47 : pretty stock standard code that you
+0:36:49 : would have seen me use a ton of times
+0:36:51 : really first up what we're doing is
+0:36:53 : we're grabbing all of our gpus and then
+0:36:54 : we're setting our memory growth equal to
+0:36:56 : true down here so i won't explain that
+0:36:58 : too much because we've gone through it a
+0:36:59 : bunch of times just know that it's good
+0:37:01 : practice to implement this when you're
+0:37:03 : using tensorflow because it's going to
+0:37:04 : ensure that you don't get too many out
+0:37:06 : of memory errors um
+0:37:08 : yeah got that in there that's pretty
+0:37:10 : self-explanatory
+0:37:11 : um and then we also want to test whether
+0:37:13 : or not our gpu is available so we can
+0:37:14 : write
+0:37:15 : tf.test.is gpu available it normally
+0:37:18 : says this is going to be deprecated but
+0:37:20 : i still use it even though it is
+0:37:22 : so it has returned true so you can also
+0:37:25 : run this command here instead of this
+0:37:26 : one so let me actually show that if i
+0:37:28 : want to grab that
+0:37:31 : this is the proper way to actually go
+0:37:33 : and do it so you can see that our gpu is
+0:37:35 : showing up there which means our gpu is
+0:37:37 : available for deep learning okay cool
+0:37:41 : so that is step 2.1 now done and 2.2
+0:37:43 : done so we've gone and imported
+0:37:45 : tensorflow we've gone and limited our
+0:37:46 : gpu memory girth next thing we need to
+0:37:48 : do is load our images into our
+0:37:50 : tensorflow data pipeline
+0:37:52 : so
+0:37:53 : in order to do this we are going to
+0:37:55 : write images equals
+0:37:58 : tf.data.dataset.list underscore files
+0:38:00 : now i can already see an error in this
+0:38:02 : so we're going to need to tweak this so
+0:38:04 : what we need to do is we need to pass
+0:38:06 : through the full path to where our
+0:38:08 : images are
+0:38:09 : and
+0:38:10 : we also need to include a wildcard
+0:38:13 : search which is this bit here
+0:38:15 : so let me explain so right now we've got
+0:38:17 : our data inside of a folder called so if
+0:38:19 : this is where our jupyter notebook is so
+0:38:21 : you can see
+0:38:22 : facedetection.ipnb right there
+0:38:25 : our data or our images are currently
+0:38:27 : inside of data inside of images and then
+0:38:29 : over here
+0:38:30 : now i think i was playing around with
+0:38:32 : this to test out training data but that
+0:38:34 : that's fine so
+0:38:36 : because our data is inside of data and
+0:38:38 : inside of images we can actually get rid
+0:38:40 : of this train bit but once we set up our
+0:38:41 : training folders we might want to tweak
+0:38:43 : this so we're going to put through the
+0:38:45 : full file path to where our images
+0:38:47 : currently are
+0:38:48 : so in this particular case they're
+0:38:50 : inside of data and inside of images i'll
+0:38:52 : probably go and update this in the code
+0:38:53 : afterwards so it's inside of github or
+0:38:56 : at least you've got the full base flow
+0:38:58 : so it's currently inside of data and
+0:39:00 : inside of images so data images
+0:39:03 : so it's right here
+0:39:05 : which means that we are going to look
+0:39:06 : inside of the data folder look inside of
+0:39:08 : the images folder and then this is the
+0:39:10 : wildcard search we're going to look for
+0:39:12 : anything which has a jpg extension so
+0:39:14 : you can see we are looking for a star
+0:39:17 : and then dot jpg so anything with dot
+0:39:18 : jpg we're going to pick this up in terms
+0:39:21 : of its file path inside of the
+0:39:23 : tensorflow data pipeline so i'll show
+0:39:25 : you what this looks like in a second
+0:39:27 : and then we're going to set shuffle
+0:39:28 : equal to false because we don't want to
+0:39:30 : shuffle i didn't realize shuffle was a
+0:39:31 : thing included and this was causing me a
+0:39:34 : ton of headaches previously as i was
+0:39:36 : building this up but just know we're not
+0:39:37 : going to shuffle it for now if i
+0:39:39 : actually go and run this
+0:39:41 : then what we should be able to do let's
+0:39:43 : take a look at what else we got here let
+0:39:45 : me show you this first bit so if i type
+0:39:46 : in images
+0:39:48 : dot as numpy iterator dot next
+0:39:52 : it's going to return the full file path
+0:39:54 : to an image now
+0:39:55 : really really important thing to note is
+0:39:57 : if you go and run that line and you've
+0:39:59 : got nothing in there or it's not showing
+0:40:01 : any images paths that means it has not
+0:40:03 : picked up your images which means the
+0:40:05 : rest of this isn't going to work so make
+0:40:07 : sure you've got this full file path set
+0:40:08 : correctly because it is really important
+0:40:10 : to ensure your images are getting picked
+0:40:12 : up
+0:40:12 : in this particular case this is what you
+0:40:14 : should be getting again the file name is
+0:40:16 : going to be different because the unique
+0:40:18 : identifiers are going to be different
+0:40:19 : every time but you should at least be
+0:40:21 : getting a file path out of this now
+0:40:25 : you're probably thinking well nick this
+0:40:26 : hasn't actually gone and loaded up an
+0:40:28 : image what the hell we actually need an
+0:40:30 : image to do object detection so that's
+0:40:32 : exactly what this next step is going to
+0:40:33 : do so we're actually written a load
+0:40:36 : image function so we can actually i'll
+0:40:38 : leave that there for you so we can write
+0:40:40 : def or we've written def to define a new
+0:40:43 : function and the function is called load
+0:40:45 : underscore image to that we are going to
+0:40:47 : pass through the full file path so this
+0:40:50 : is what we're going to do down here when
+0:40:51 : we use this actual function
+0:40:53 : so we'll pass through the file path
+0:40:55 : which is effectively going to be this
+0:40:57 : and this is going to use two lines of
+0:40:59 : tensorflow code to actually read in our
+0:41:01 : image so first up we're going to run
+0:41:03 : tf.io.read file and that is going to
+0:41:06 : take in the file path which is going to
+0:41:07 : return a byte encoded image then we can
+0:41:10 : run tf.io.decode.jpg
+0:41:13 : and then pass through that byte image so
+0:41:14 : this goes into here and then we get our
+0:41:16 : image back then in terms of using this
+0:41:19 : with a tensorflow data pipeline you can
+0:41:21 : actually use the map function so if we
+0:41:23 : go um tensorflow
+0:41:26 : data there it is i've opened this up so
+0:41:28 : many times
+0:41:30 : so the documentation for this is right
+0:41:32 : over here so on this side it should say
+0:41:36 : map map map over here
+0:41:39 : so this actually explains what happens
+0:41:41 : so this map applies map function to each
+0:41:43 : element in the data set now the map
+0:41:45 : function in our particular case is
+0:41:47 : called load image so it's going to apply
+0:41:48 : that load image function on each value
+0:41:51 : in our data set which in this particular
+0:41:52 : case are these file paths so it's going
+0:41:54 : to go through and actually return our
+0:41:56 : image so if we now go and run this
+0:41:59 : we actually need to run the load image
+0:42:01 : function if we go and run that
+0:42:03 : now we're going to get our image back so
+0:42:05 : we're effectively now mapping through
+0:42:06 : each one of those images and we're now
+0:42:08 : actually able to get an image back so
+0:42:10 : this is what you should look or what it
+0:42:12 : should look like after you've gone and
+0:42:14 : run through that data transformation
+0:42:16 : now what we can actually go on ahead and
+0:42:18 : do is visualize those images because
+0:42:19 : we've now gone and picked up all of our
+0:42:21 : images from our images folder we can
+0:42:23 : actually go and visualize them so that
+0:42:25 : is step 2.1 2.2 and 2.3 done so we've
+0:42:28 : successfully got some images inside of
+0:42:30 : our tensorflow data pipeline and what i
+0:42:32 : mean by tensorflow data pipeline if i
+0:42:34 : type in type
+0:42:35 : and then images
+0:42:39 : uh we've actually gone yeah that's fine
+0:42:41 : type and then
+0:42:42 : images
+0:42:44 : you can see that this is actually a
+0:42:46 : tensorflow data pipeline so the fact
+0:42:47 : that it says tensorflow python data data
+0:42:49 : set ops that is a tensorflow data
+0:42:52 : pipeline and again because the last uh
+0:42:54 : function or transformation that we
+0:42:56 : chained onto it was that mapping you can
+0:42:58 : see it's returning map data set
+0:43:00 : cool so that is looking okay now we can
+0:43:02 : also go and visualize these images
+0:43:04 : inside of matplotlib so we can go and
+0:43:06 : batch these images up so again this is
+0:43:08 : another function available inside of the
+0:43:10 : tensorflow data set api so let me show
+0:43:12 : you this one
+0:43:14 : so if i go and select batch up here
+0:43:17 : you could see this component it
+0:43:19 : basically batches our images up so
+0:43:21 : rather than returning one image it's
+0:43:22 : going to return the number of values
+0:43:24 : inside of a batch pretty common when we
+0:43:26 : go and do deep learning
+0:43:28 : so here we are going to batch it up into
+0:43:30 : a set of four so we can visualize four
+0:43:32 : at a time so image underscore generator
+0:43:34 : equals images dot batch and we're gonna
+0:43:37 : put four in each batch and we're going
+0:43:39 : to return dot as numpy iterative
+0:43:42 : so this actually allows us to loop
+0:43:44 : through our images and get them back so
+0:43:46 : images underscore generator we can then
+0:43:47 : run images underscore generator dot next
+0:43:50 : to get a next batch
+0:43:52 : so plot underscore images equals image
+0:43:54 : underscore generator dot next and we can
+0:43:56 : actually run this line
+0:43:58 : multiple times and it's going to return
+0:44:00 : a new batch of data each and every time
+0:44:02 : that's what the tensorflow data pipe or
+0:44:04 : tensorflow fit model actually does or
+0:44:07 : fit function actually does it'll go and
+0:44:09 : run next train on a batch run next train
+0:44:12 : on a batch run next train on the batch
+0:44:14 : you get the idea so if i go and run this
+0:44:17 : and then we go and run the next line
+0:44:18 : this is just going to loop through and
+0:44:20 : visualize our images so it's just using
+0:44:21 : matplotlib and the subplots
+0:44:24 : class here to actually do this so if i
+0:44:26 : go and run that you can see we've got
+0:44:28 : four images pretty cool we can go and
+0:44:30 : run next again we're going to get
+0:44:32 : another four images run next again
+0:44:34 : another four images next
+0:44:37 : how cool is that so we can now see a
+0:44:39 : bunch of images that we've got now you
+0:44:41 : can see that right now they're not
+0:44:42 : shuffled so because it looks like it's
+0:44:44 : actually like a moving image
+0:44:46 : pretty cool right now if we wanted to we
+0:44:48 : could actually enable shuffle up here
+0:44:50 : and we'd actually get random images so
+0:44:51 : let me show you that so if i disable
+0:44:53 : shuffle here
+0:44:57 : and we go and visualize so you can see
+0:44:59 : they're all going to be slightly more
+0:45:00 : random now right so you can see that it
+0:45:02 : doesn't look like it's a sequential um
+0:45:05 : set of images it's definitely a lot more
+0:45:06 : random
+0:45:09 : cool all right so we now have our images
+0:45:12 : now done so that is step
+0:45:14 : or part two now done so we've now gone
+0:45:16 : and reviewed our data set and built at
+0:45:17 : least our image loading function which
+0:45:19 : we'll be able to use later to build up
+0:45:21 : our tensorflow data pipeline so we
+0:45:22 : imported tens flow limited our memory
+0:45:25 : growth and took a look at how we can
+0:45:26 : load images into our tensorflow data
+0:45:28 : pipeline we also went and visualized our
+0:45:30 : images using matplotlib
+0:45:32 : next thing that we need to do is
+0:45:34 : partition our unaugmented data now this
+0:45:36 : is manual so i've written here this is
+0:45:38 : this step is manually splitting our data
+0:45:40 : and i've done this because it just gives
+0:45:42 : you a little bit more control over
+0:45:44 : actually splitting this if you wanted to
+0:45:46 : use psychic learn train test split to
+0:45:47 : actually do this by all means go ahead
+0:45:49 : again i was running out of energy by
+0:45:51 : this time to go and do that um full
+0:45:53 : disclosure i wanted to to be real with
+0:45:55 : you guys i always try to be
+0:45:57 : again uh it's not all that pythonic and
+0:46:00 : it's probably i've got some duplicate
+0:46:02 : code but it does work does work okay so
+0:46:04 : that's a key thing to know so what we're
+0:46:06 : going to do now is we're going to go and
+0:46:07 : move our data into train test and
+0:46:09 : validation partition so we need to
+0:46:11 : create a couple more folders so inside
+0:46:13 : of our root folder
+0:46:15 : actually inside of our data folder we're
+0:46:17 : going to create another couple of
+0:46:18 : folders so we're going to create a train
+0:46:20 : folder
+0:46:21 : we're going to create a test folder and
+0:46:23 : we're going to create a vowel folder so
+0:46:25 : we've now got four folders there
+0:46:28 : so train test and valve inside a train
+0:46:31 : we're going to create another folder
+0:46:32 : called images
+0:46:33 : another folder called labels
+0:46:37 : and then we're going to jump back so
+0:46:39 : inside a train we've now got labels and
+0:46:40 : images and inside of tests again we're
+0:46:43 : going to do the same labels
+0:46:47 : images
+0:46:48 : so again inside the test we've now got a
+0:46:50 : labels and images folder and then inside
+0:46:52 : a valve we're going to do exactly the
+0:46:54 : same so labels
+0:46:56 : images
+0:46:59 : okay so it should now look like this so
+0:47:01 : our data folder has now got a folder
+0:47:03 : called labels called the images and
+0:47:04 : these are the raw ones we've gone and
+0:47:06 : collected or the unpartitioned data and
+0:47:08 : then we've got a folder called train
+0:47:10 : we've got again a folder called labels
+0:47:12 : with nothing in it at the moment
+0:47:14 : and we've also got a so labels has got
+0:47:17 : nothing in it
+0:47:19 : or images got nothing in it labels got
+0:47:20 : nothing in it
+0:47:22 : test again labels nothing in it images
+0:47:26 : nothing in a minute and then if you're
+0:47:27 : going to val same thing all right you
+0:47:29 : get the idea so that is our set of
+0:47:32 : folders now set up now what we actually
+0:47:33 : want to go ahead and do is actually move
+0:47:35 : some data in there so i'm just going to
+0:47:36 : jump into the folders
+0:47:39 : and i'm just going to go and set a bunch
+0:47:42 : of images so we want
+0:47:44 : let's actually work out so we've got 90
+0:47:46 : images total so let's say we want uh i
+0:47:49 : don't know 70 assigned to our
+0:47:52 : training data so let's say 0.7
+0:47:56 : so we'll assign let's say 63 so we're
+0:47:58 : going to assign 63
+0:48:00 : to train
+0:48:02 : and then let's go and assign i don't
+0:48:04 : know let's say 15 to both vowel and
+0:48:08 : vowel and test so 90 multiplied by 0.15
+0:48:10 : and then we'll assign what is that uh so
+0:48:13 : we'll be doing 14 and 13 maybe
+0:48:19 : so 14 and 13
+0:48:22 : to uh what is it test and
+0:48:25 : val
+0:48:26 : so that means so 63 plus what is it 27
+0:48:28 : down here we should have the full
+0:48:31 : 90 wait am i is my mouth right 63 plus
+0:48:34 : 27 yeah my mouth's right so 90. cool
+0:48:37 : sorry mind blank
+0:48:38 : okay cool so we've now successfully got
+0:48:40 : our images now allocated
+0:48:43 : what we actually need to do is actually
+0:48:45 : go and split them up so let's go and
+0:48:46 : grab what are we getting 63 for train so
+0:48:48 : we're just going to randomly select and
+0:48:50 : again this is not all that scientific
+0:48:51 : but i'm just going to grab 63 images
+0:48:55 : which is going to be the large majority
+0:48:57 : right
+0:48:59 : this is my random split function me just
+0:49:02 : randomly clicking
+0:49:07 : i'm just monitoring down the bottom to
+0:49:08 : see once we get to
+0:49:10 : 63
+0:49:15 : there's not too many we probably should
+0:49:16 : have got some more data we could always
+0:49:18 : add more later on
+0:49:24 : but keep in mind we're going to augment
+0:49:26 : as well right so we are going to be able
+0:49:27 : to
+0:49:28 : have a whole bunch more data so that's
+0:49:32 : yeah okay
+0:49:35 : boom boom
+0:49:37 : all right that's 63 so i'm going to cut
+0:49:39 : those and i'm going to put them inside
+0:49:41 : of the train folder so i'm going to cut
+0:49:43 : go to my train folder and go into the
+0:49:45 : images folder inside a train paste all
+0:49:47 : of those there so that is 63 images
+0:49:49 : inside of the train images folder
+0:49:52 : now we're going to go into images again
+0:49:55 : and we are going to get 14 for what is
+0:49:57 : it for val or test whatever one of those
+0:50:04 : what's happened there why do we
+0:50:07 : 39 okay wait why is there
+0:50:10 : 39 looks like we copied and pasted them
+0:50:13 : there
+0:50:18 : so what do we need we need 14
+0:50:21 : right that's 14 images so i'm going to
+0:50:23 : go and throw those into
+0:50:26 : let's put that inside of test so 14 inch
+0:50:30 : test
+0:50:31 : all right so we've got a bunch of
+0:50:32 : variations again some of us without a
+0:50:34 : class or some of those without a face in
+0:50:36 : it so let's go back into
+0:50:39 : the let's grab the rest
+0:50:42 : that's train so we want to go back into
+0:50:44 : the raw images folder grab these last
+0:50:47 : ones and we're going to throw those into
+0:50:49 : the valve folder wait we've already got
+0:50:51 : them no about cool all right so we've
+0:50:53 : got 13 images inside a val we have
+0:50:57 : how many inside a train we've got 63
+0:51:00 : inside a train and if we're going to
+0:51:01 : test
+0:51:03 : we've got 14 inside a test cool all
+0:51:05 : right that is looking good so 63
+0:51:07 : assigned the train of 14 assigned
+0:51:09 : to val i think no we assigned
+0:51:12 : god i can't remember
+0:51:15 : we assigned the rest to valentes but
+0:51:17 : let's just make sure we've got this
+0:51:20 : noted uh where are we we are inside of
+0:51:24 : let's go check test
+0:51:27 : so how many is inside a test so we've
+0:51:28 : got 14 assigned to test okay 14 to test
+0:51:31 : and 13 about okay so those are now
+0:51:32 : successfully assigned now rather than
+0:51:35 : doing the exact same for the labels i've
+0:51:36 : gone and read in a script which
+0:51:38 : basically loops through the train test
+0:51:40 : and val folder and again it's looking
+0:51:42 : for those folder names so you've got to
+0:51:43 : ensure that they're the same so train
+0:51:44 : test and valve so over here we have
+0:51:47 : inside of data
+0:51:48 : so we've got train test and val and
+0:51:50 : inside of those we've got labels and
+0:51:51 : images so what it's going to do is it's
+0:51:53 : actually going to move the associated
+0:51:55 : labels from the raw folder which is
+0:51:57 : inside of currently in still inside of
+0:51:59 : the root labels folder it's going to
+0:52:01 : grab all of these and it's going to move
+0:52:02 : them into their respective matching
+0:52:04 : folders so it will match them up to val
+0:52:07 : train and test so if i now go and run
+0:52:09 : this
+0:52:11 : all things holding equal we should
+0:52:13 : effectively have our labels moved over
+0:52:15 : so if we go into labels you can see
+0:52:17 : there's nothing left there now if i go
+0:52:18 : into train and labels
+0:52:20 : you can see it's going to move those
+0:52:22 : annotations so if we go into test and
+0:52:24 : labels going to move those labels as
+0:52:26 : well if we go into
+0:52:28 : val and labels you can see it's going to
+0:52:30 : move all those labels so that is our
+0:52:33 : data now partitioned so we've now
+0:52:34 : successfully gone and partitioned out
+0:52:36 : our unaugmented data
+0:52:38 : so again remember what you need to do is
+0:52:40 : you need to go and move out of the the
+0:52:42 : data out of the labels and images
+0:52:44 : folders into those valve training test
+0:52:46 : folders now if you go and add more data
+0:52:48 : later effectively all you're going to
+0:52:50 : need to do is go and push that data back
+0:52:52 : into those folders again and push the
+0:52:53 : annotations into their matching folders
+0:52:55 : so that when we go and do augmentation
+0:52:57 : it does the exact same okay so that is
+0:53:01 : step three now done so we've
+0:53:02 : successfully gone and moved over our
+0:53:05 : unaugmented data and we've gone and
+0:53:06 : moved over the labels
+0:53:08 : now we are up to applying our image
+0:53:10 : augmentation so
+0:53:12 : first thing that we need to do is import
+0:53:14 : albumentations so again albumentations
+0:53:17 : is this library over here and if you
+0:53:19 : actually scroll on down it shows you how
+0:53:21 : to actually use this so we effectively
+0:53:22 : set up a transformation pipeline which
+0:53:25 : looks like you can basically assign a
+0:53:27 : whole bunch of different transformations
+0:53:28 : so over there you've got
+0:53:30 : random crop
+0:53:31 : horizontal flip random brightness so on
+0:53:33 : and so forth there's a whole bunch of
+0:53:35 : others i think we're going to use some
+0:53:36 : others as well and then you need to pass
+0:53:37 : through your bounding box parameters as
+0:53:39 : well
+0:53:41 : okay so first thing we need to do is we
+0:53:42 : need to import it so i'm importing
+0:53:44 : abumentations as alb
+0:53:48 : so give that a sec water break running
+0:53:50 : out of my throat is going
+0:53:55 : okay so then the next thing that we're
+0:53:57 : going to do is actually define our
+0:53:58 : augmentation pipeline
+0:54:00 : so this is what the recommended not the
+0:54:03 : recommended one what the example one
+0:54:05 : looks like i've gone and added a bunch
+0:54:06 : of other things so let me actually break
+0:54:08 : this down so you can see it
+0:54:13 : boom and then uh yeah boom okay
+0:54:16 : so what we've actually got is six
+0:54:19 : different uh augmentations that we're
+0:54:21 : going to apply we've got random crop
+0:54:23 : horizontal flip random brightness
+0:54:24 : contrast random gamma rgb shift and
+0:54:27 : vertical flip so these ones are actually
+0:54:29 : gonna the random crop is the
+0:54:32 : trickiest one to handle if you were to
+0:54:33 : do this well actually no random crop
+0:54:35 : horizontal flip and vertical flip a
+0:54:37 : tricky to handle if you didn't have
+0:54:39 : something that does your annotation um
+0:54:43 : augmentation as well mind blank okay so
+0:54:46 : al alb dot random crop we're specifying
+0:54:48 : how big augmented images are gonna be so
+0:54:50 : we're actually going to cut them down to
+0:54:52 : 450 by 450 pixels because right now they
+0:54:56 : should be uh what is it so if we take a
+0:54:58 : look at height so it should be 480
+0:55:00 : pixels by
+0:55:02 : 480 by 640. so it's going to be
+0:55:04 : basically 480 by 640. so we're going to
+0:55:06 : cut them down a little bit so that means
+0:55:08 : that we can do that dynamic crop then we
+0:55:10 : are going to and let me actually just
+0:55:12 : show you that so if we go and grab an
+0:55:13 : image
+0:55:15 : um cv2.i am read
+0:55:18 : let's grab a image so if we go into
+0:55:20 : train
+0:55:21 : images this purely option i'm just
+0:55:23 : showing you guys osl path to join
+0:55:25 : at train so it should be inside of data
+0:55:27 : dot train dot
+0:55:30 : images and then let's grab one
+0:55:40 : right so i'm just grabbing a random
+0:55:41 : image at the moment just to take a look
+0:55:43 : so uh let's actually assign it a
+0:55:45 : variable name
+0:55:49 : so image.shape
+0:55:51 : yeah so 480 pixels high by 640 pixels
+0:55:54 : wide by three channels deep so again
+0:55:56 : we're going to be cropping that down
+0:55:58 : and this might vary so if you capture
+0:55:59 : images of different sizes or if you've
+0:56:01 : captured images on your iphone again um
+0:56:04 : you can still use this just be mindful
+0:56:06 : of the image shape so you at least want
+0:56:08 : it to be
+0:56:09 : or that the minimum dimension needs to
+0:56:11 : be should ideally be there
+0:56:13 : should ideally be bigger than whatever
+0:56:15 : you're going to crop it to so if your
+0:56:16 : image is 100 pixels by 100 pixels well
+0:56:19 : you're going to have a hard time
+0:56:20 : cropping into 450 by 450 because it
+0:56:22 : doesn't even meet those minimums so just
+0:56:24 : something to keep in mind there
+0:56:26 : okay so
+0:56:28 : that is our augmentation pipeline so you
+0:56:30 : can see inside of square brackets i've
+0:56:31 : got those different uh transformations
+0:56:34 : there this is my ocd kicking and it
+0:56:36 : kills me that that wasn't aligned okay
+0:56:37 : so we've got random crop horizontal flip
+0:56:39 : random brightness random gamma rgb shift
+0:56:42 : and vertical flip you could take some of
+0:56:43 : these out you could add more in if you
+0:56:45 : wanted to i've just found that those six
+0:56:47 : give us a sufficient amount of data and
+0:56:50 : then we are going to specify our
+0:56:51 : bounding box parameters so in this
+0:56:54 : particular case we're specifying the
+0:56:56 : format of our annotation so the let me
+0:56:59 : actually show you this because it's
+0:57:00 : really important so if you get
+0:57:01 : annotations different formats it's
+0:57:04 : important to note that you need to go
+0:57:05 : and change the format down here
+0:57:08 : so right down here
+0:57:10 : this is the the different formats that
+0:57:12 : it's expecting so pascal voc is a really
+0:57:14 : popular format so you've got x min y min
+0:57:17 : x max y max and these are unnormalized
+0:57:20 : images so they're not or unscaled images
+0:57:22 : so this hasn't been adjusted for the
+0:57:24 : size of the image so you can see it's
+0:57:26 : got the raw image size so 98 3 45 420
+0:57:29 : 462.
+0:57:30 : we are going to go and divide our images
+0:57:32 : by the shape of our or divide our labels
+0:57:35 : by the shape of our image so you can see
+0:57:36 : there that these ones have actually been
+0:57:38 : normalized so they've been scaled for
+0:57:40 : the size of the actual image so rather
+0:57:42 : than having the raw coordinates they've
+0:57:44 : actually been divided by the width by
+0:57:46 : the height by the width by the height
+0:57:48 : which is exactly what we'll do
+0:57:50 : you can also use coco or yolo as well so
+0:57:52 : those are again each one of those
+0:57:54 : different models has a slightly
+0:57:55 : different way of representing the
+0:57:57 : annotation so
+0:57:58 : we actually start off in pascal voc and
+0:58:01 : then we go and adjust it to be inside of
+0:58:03 : this arbumentations format as well
+0:58:06 : okay so that is our augmented done so
+0:58:08 : i've just gone and run that so that is
+0:58:10 : our augmentation pipeline and now set up
+0:58:12 : now what we can go ahead and do is go
+0:58:14 : and test this out so the next thing that
+0:58:16 : we're going to do is actually
+0:58:18 : load up an image and run it through
+0:58:19 : through the augmentation pipeline so
+0:58:22 : first thing what we want to do is load
+0:58:23 : up an image using cb2.imread
+0:58:26 : and to that we're going to pass through
+0:58:27 : an image from our training data set so
+0:58:30 : data train images and then you need to
+0:58:32 : go and replace whatever this file name
+0:58:34 : is here if you go and run this right now
+0:58:35 : let's run this oh that image exists
+0:58:39 : weird okay so maybe it's gone and
+0:58:40 : generated that actually no so if i go
+0:58:42 : and run image you can see it's blank so
+0:58:44 : right so if i'm running that it's blank
+0:58:46 : right now so it won't throw an error
+0:58:48 : it'll just return nothing and that is
+0:58:50 : because this image doesn't exist right
+0:58:51 : now which is what i was expecting so if
+0:58:53 : we go and grab this image though
+0:58:56 : so grab that image name
+0:58:58 : and paste that is my head covering that
+0:58:59 : yes it is and go and paste that in there
+0:59:02 : now if i go and run this you can see our
+0:59:04 : images return back so just something to
+0:59:06 : keep in mind so it won't throw an error
+0:59:08 : it just won't return an image and you'll
+0:59:10 : be sitting there like
+0:59:11 : what is happening it's not working nick
+0:59:14 : just keep in mind that you need to go
+0:59:15 : and pass through an image or the image
+0:59:17 : name from your actual images folder
+0:59:20 : okay
+0:59:21 : then what we can go ahead and do is load
+0:59:23 : in our matching annotation so we're
+0:59:25 : going to go into our os.part.join we're
+0:59:28 : going to go into our training folder and
+0:59:29 : into our labels folder and we're going
+0:59:31 : to grab the matching annotation now
+0:59:33 : assuming we actually have a face inside
+0:59:36 : of this image here the annotation name
+0:59:39 : will be the exact same as the image name
+0:59:41 : except the only thing is the extension
+0:59:43 : will be json so if i go and paste that
+0:59:46 : there
+0:59:47 : and run this
+0:59:48 : looks like no issues so we can actually
+0:59:50 : take a look at our label
+0:59:53 : boom look at that so we've got our label
+0:59:56 : cool thing to know is if you wanted to
+0:59:57 : go and grab the class so we can go into
+1:00:00 : again this is a dictionary so let me
+1:00:02 : show you so type
+1:00:05 : it's a dictionary so we can just
+1:00:06 : navigate it as a dictionary so we can go
+1:00:09 : into shapes
+1:00:14 : and that gives us our annotation go into
+1:00:16 : you can see that that is inside of a
+1:00:18 : list
+1:00:21 : right
+1:00:22 : to go into a list we can use number
+1:00:24 : indexing so we go grab index zero and
+1:00:26 : then we can go and grab our class so if
+1:00:29 : we wanted to we've only got one class
+1:00:30 : again let me know in the comments below
+1:00:32 : if you wanted me to do more for
+1:00:33 : multi-class or multi-object so that's
+1:00:36 : our label
+1:00:37 : then we can go and grab our points as
+1:00:39 : well so if we go and grab points
+1:00:43 : boom those are our points pretty cool
+1:00:45 : right
+1:00:46 : okay so that is our image successfully
+1:00:48 : loaded our coordinates successfully
+1:00:50 : loaded our annotations now what we can
+1:00:52 : go ahead and do is extract coordinates
+1:00:54 : so we are going to do exactly what i've
+1:00:55 : shown you up here we're just going to
+1:00:57 : store them inside of a coordinate array
+1:00:59 : that you can see there so if i go and
+1:01:00 : run this
+1:01:02 : and go and take a look at codes and
+1:01:03 : again this isn't super pythonic but
+1:01:05 : again just for ease of reading i'm
+1:01:07 : showing you what it looks like so we've
+1:01:08 : now gone and taken what you can see over
+1:01:10 : here and transformed it into a um a
+1:01:13 : simple vector right so it's not a multi
+1:01:16 : it's not a what is it a tensor which is
+1:01:18 : higher than rank one so we've
+1:01:19 : effectively just got a vector over here
+1:01:22 : with all of our coordinates so 191 191
+1:01:25 : 77 77 350 350 315 315
+1:01:31 : quick drink break
+1:01:32 : all right so this is going to be
+1:01:34 : x1 y1 x2 y2 so this will be the top
+1:01:38 : coordinate this will be the bottom
+1:01:40 : coordinate
+1:01:41 : now the next thing that we want to do is
+1:01:43 : go and do that transformation that i was
+1:01:45 : telling you about so
+1:01:48 : is it going to be x2 yes because x yeah
+1:01:51 : okay cool that that makes sense all
+1:01:53 : right so we're going to go and convert
+1:01:55 : this set of coordinates into so you saw
+1:01:57 : that we had pascal voc here which is
+1:01:59 : unadjusted for the size of the image so
+1:02:01 : this is based on this raw image over
+1:02:03 : here so it's 98 345 which should be 98
+1:02:06 : 345 and then force let me zoom in
+1:02:08 : because you probably can't see that you
+1:02:10 : can see that this annotation is 98 by
+1:02:12 : 345 98 by 345 which is that then 420 by
+1:02:16 : 462 so 420 by 462.
+1:02:19 : what you're effectively going to do is
+1:02:20 : you're going to divide this particular
+1:02:22 : value by the width of the image so it'll
+1:02:25 : be divided by 640 this particular value
+1:02:27 : by the height of the image so it'll be
+1:02:28 : 480 so that gives you these sets of
+1:02:31 : values over here right that's
+1:02:33 : effectively what we're going and doing
+1:02:34 : over here so we're grabbing our raw
+1:02:36 : coordinates which is this and we're
+1:02:38 : dividing it by the width of the image
+1:02:40 : and by the height of the image that will
+1:02:42 : divide these two then we're going to
+1:02:44 : divide this value by the width of the
+1:02:46 : image by the height of the image that
+1:02:47 : will divide these two so we're going to
+1:02:49 : run this
+1:02:50 : and take a look at our chords
+1:02:54 : boom
+1:02:56 : so we've now gone and transformed our
+1:02:57 : coordinates from the raw pascal voc
+1:03:00 : format which is this over here to the
+1:03:02 : albumentations format which is this over
+1:03:05 : here
+1:03:06 : okay cool so that is looking good now
+1:03:08 : what we can do is we can actually go and
+1:03:10 : run that image and those sets of
+1:03:12 : coordinates through our augmenter
+1:03:15 : so what we're going to actually do is
+1:03:17 : return back our augmented uh what is it
+1:03:20 : i think it actually returns back a
+1:03:21 : dictionary so augmented equals augmenter
+1:03:24 : and then to that we're going to pass
+1:03:25 : through our image we're going to pass
+1:03:26 : through our bounding box coordinates and
+1:03:27 : we're going to pass through our class
+1:03:28 : label so if i go and run this
+1:03:31 : let me show you augmented
+1:03:34 : so you can see you actually get a
+1:03:35 : dictionary back so let me prove that too
+1:03:37 : so if i type in type
+1:03:39 : got a dictionary and that dictionary has
+1:03:42 : should have two keys
+1:03:44 : so it's got it's got three keys so it's
+1:03:46 : got an image it's got bounding boxes and
+1:03:47 : it's got class labels so if we go and
+1:03:49 : take a look
+1:03:52 : so images
+1:03:54 : or image image image
+1:03:56 : right so there's that's our image which
+1:03:59 : should now be 450 by 450 because
+1:04:02 : remember this cropping is going to
+1:04:04 : change the shape of that
+1:04:06 : then if we go and take a look at our
+1:04:08 : labels
+1:04:09 : there's a label or labels i can't
+1:04:10 : remember now labels
+1:04:15 : what is it
+1:04:18 : b boxes not labels
+1:04:20 : b boxes
+1:04:23 : right so those are our coordinates and
+1:04:25 : you can see that they differ from our
+1:04:27 : raw coordinates that's because we've
+1:04:28 : gone and probably done a crop so if we
+1:04:30 : go and take a look now so these two
+1:04:33 : lines are actually going to allow you to
+1:04:34 : visualize that so cv2.rectangle actually
+1:04:36 : draws a rectangle on an image so um
+1:04:39 : whenever you see the cool object
+1:04:40 : detection tutorials that's probably
+1:04:41 : what's being used so augmented so to
+1:04:44 : that we are going to pass through our
+1:04:45 : augmented image so this
+1:04:48 : and then we're also going to extrapolate
+1:04:50 : and get the true tuples that you need to
+1:04:52 : actually draw the bounding box so just
+1:04:54 : know this is the top most coordinate
+1:04:56 : this is the bottom most coordinate so
+1:04:58 : over here what i'm doing is i'm just
+1:04:59 : grabbing the first two values so let me
+1:05:02 : show you
+1:05:06 : these are the first two values so if we
+1:05:08 : go and take a look at augmented
+1:05:11 : boxes
+1:05:14 : b boxes
+1:05:16 : you can see first two values to 53.33
+1:05:19 : and remember these correspond to x-min
+1:05:22 : y-min
+1:05:23 : and then if we go and grab the last two
+1:05:24 : values which would be like this
+1:05:29 : last two values
+1:05:30 : this is going to represent x max y max
+1:05:33 : which is this value and this value over
+1:05:36 : here so now
+1:05:38 : and then the other parameters so you
+1:05:39 : also need to represent this as a tuple
+1:05:42 : and we're going and rescaling it to
+1:05:43 : represent the size of the image because
+1:05:45 : once you go and transform it into
+1:05:46 : normalized values you need to go and
+1:05:48 : untransform it in order to go and render
+1:05:50 : otherwise it's going to look really
+1:05:51 : really small
+1:05:52 : so that's that transformation that we're
+1:05:54 : doing there we're also representing it
+1:05:55 : as an integer and then we're passing it
+1:05:57 : through as a tuple because that's what
+1:05:59 : opencv expects and then we're also
+1:06:02 : dynamically changing or we're not
+1:06:03 : dynamically changing the color there
+1:06:04 : we're just specifying what the color is
+1:06:06 : and this is should be in bgr format so
+1:06:08 : blue green red and then the thickness of
+1:06:11 : the actual image or the actual rectangle
+1:06:13 : so if we go and run this
+1:06:15 : look at that so it's actually gone and
+1:06:17 : flipped our image and it's also gone and
+1:06:20 : drawn the bounding box around it now
+1:06:22 : even though it's showing up blue it's
+1:06:23 : not actually blue in reality it's
+1:06:25 : showing up blue there because opencv
+1:06:27 : reads an image as bgr but matplotlib
+1:06:31 : renders it as rgb so that's fine it's
+1:06:33 : not actually blue just keep that in mind
+1:06:34 : but you can see that it's successfully
+1:06:37 : gone and augmented our bounding box but
+1:06:39 : it's still showing up around our face
+1:06:42 : now we've only done this for one image
+1:06:43 : right so i've sort of shown you and
+1:06:45 : walked you through it for one image but
+1:06:47 : i really wanted to drill into this
+1:06:48 : because i think it's such a really
+1:06:49 : really important topic so that is for
+1:06:52 : step four now done so we've set up
+1:06:53 : albumentations and our pipelines we're
+1:06:55 : actually going to use this for our
+1:06:57 : full-blown pipeline now
+1:06:59 : we've gone and loaded a test image and
+1:07:00 : tested it out we've gone and taken a
+1:07:02 : look at what the annotations look like
+1:07:04 : gone and applied some augmentations and
+1:07:06 : then we've also gone and visualized it
+1:07:07 : so that is step four now done we are now
+1:07:10 : up to step five so the first part of
+1:07:13 : work that we're going to do inside of
+1:07:15 : step 5 is run our augmentation pipeline
+1:07:18 : over our training testing and validation
+1:07:20 : partitions for all of our images because
+1:07:22 : up until now we've only really done it
+1:07:24 : for one image right but we need to do it
+1:07:27 : for all of our data to get true value
+1:07:29 : now this is a ton of code and something
+1:07:32 : that i spent a while
+1:07:34 : writing up so
+1:07:35 : probably not worthwhile going through
+1:07:37 : every single line in great detail but
+1:07:39 : i'm going to explain to you at a high
+1:07:40 : level what is actually happening here so
+1:07:42 : first of what we're going to do is we're
+1:07:44 : going to loop through our training
+1:07:45 : testing and validation folders and we're
+1:07:47 : going to grab every single image inside
+1:07:50 : of that we are then going to double
+1:07:52 : check whether or not an annotation
+1:07:54 : exists for that image because remember
+1:07:56 : some images aren't going to have a head
+1:07:58 : in them if an annotation doesn't exist
+1:08:00 : well we're going to create a default
+1:08:02 : annotation which is this set of
+1:08:04 : coordinates here so we're just basically
+1:08:05 : going to assign a zero set of
+1:08:08 : coordinates
+1:08:09 : and at the same time we're also going to
+1:08:11 : assign a class of 0 down there now
+1:08:14 : assuming a set of coordinates do exist
+1:08:16 : we're effectively going to go and do
+1:08:18 : that exact same transformation over here
+1:08:20 : which is what we did right up here so
+1:08:23 : we're extracting our coordinates and
+1:08:24 : we're taking it from a set of or a
+1:08:27 : tensor which is a stacked array to a
+1:08:30 : straight vector which is what you can
+1:08:32 : see down there so that is exactly what
+1:08:34 : these two lines of code are doing so up
+1:08:36 : until now from these all we're doing is
+1:08:39 : loading up the image and we're loading
+1:08:40 : up the labels
+1:08:42 : then what we're doing is we're going and
+1:08:43 : creating 60 images per base image so for
+1:08:47 : x in range 60 so this means that we're
+1:08:49 : going to be grabbing
+1:08:51 : we're going to be creating 60 augmented
+1:08:53 : images for every single base image so
+1:08:55 : that means that for our 90 images that
+1:08:57 : we created we're going to be creating 90
+1:08:59 : multiplied by 60 images or raw
+1:09:02 : augmented images that we're going to be
+1:09:03 : able to use
+1:09:04 : then effectively what we're doing is
+1:09:06 : we're running our data through our
+1:09:07 : augmentation pipeline which is what you
+1:09:09 : can see there so augmented equals
+1:09:11 : augmenter and we're going to effectively
+1:09:13 : be doing what we did just here so we're
+1:09:15 : just going to be doing it first 60 times
+1:09:17 : to create 60 different images then what
+1:09:19 : we do is we write out the augmented
+1:09:21 : images or the augmented image and we're
+1:09:24 : going to be putting that inside of a
+1:09:25 : folder called org data so i'm actually
+1:09:27 : going to show you how to set that up in
+1:09:28 : a second and we're going to do likewise
+1:09:30 : we're going to transform our coordinates
+1:09:32 : and we're going to write down those
+1:09:33 : annotations using
+1:09:35 : json.dump as well so by the end of this
+1:09:38 : we should have
+1:09:39 : 60 multiplied by 90 images and
+1:09:41 : annotations for our training partition
+1:09:43 : likewise the exact same for
+1:09:45 : 60 by 90 for all of our data right but
+1:09:48 : remember we've partitioned it out so
+1:09:49 : we're going to have some of those split
+1:09:51 : up into training testing and valve
+1:09:54 : okay so this is going to do a ton of
+1:09:56 : data augmentation for us if you wanted
+1:09:58 : to do more data you could actually just
+1:09:59 : bump up that number there so let's say
+1:10:01 : you wanted 120 images per base image
+1:10:03 : it'll be 120 here i found that 60 is a
+1:10:05 : good mix and gives you enough data
+1:10:08 : so let's zoom back in
+1:10:11 : cool all right so we're there so what we
+1:10:12 : now need to do is set up where our
+1:10:15 : augmented data is going to be
+1:10:17 : all we need to do is go back into our
+1:10:18 : root folder so this is our raw data here
+1:10:20 : right so we're going to create a new
+1:10:21 : folder called org underscore data
+1:10:25 : and inside of that we're going to create
+1:10:26 : a training
+1:10:28 : so
+1:10:28 : train test
+1:10:31 : and valve folder
+1:10:33 : and we're effectively just going to
+1:10:34 : replicate what we did for our data
+1:10:36 : folder so inside eval we're going to
+1:10:38 : create a folder called images
+1:10:41 : and then a folder called labels
+1:10:43 : and then inside of train
+1:10:46 : we're going to create a folder called
+1:10:48 : images
+1:10:49 : and labels
+1:10:52 : and then inside of test you guessed it
+1:10:54 : we're going to create a folder called
+1:10:55 : images
+1:10:57 : and labels
+1:10:58 : boom
+1:11:00 : right so we've now got three folders
+1:11:01 : inside of org data so we've got a valve
+1:11:03 : folder which has labels and images we've
+1:11:05 : got a train folder which has labels and
+1:11:06 : images we've got a test folder which has
+1:11:08 : labels and images but as of right now we
+1:11:10 : don't actually have any data in there we
+1:11:12 : actually need to go and run this
+1:11:13 : augmentation pipeline to do that so
+1:11:16 : let's actually go and run this so if we
+1:11:17 : go and step out of it a little bit now
+1:11:20 : this will take a little while to run
+1:11:21 : because it's doing quite a fair bit of
+1:11:22 : stuff but if we actually go and run this
+1:11:25 : you can see we've got the little star
+1:11:26 : over there so this is now running out oh
+1:11:29 : that searches popped up
+1:11:31 : it's happening
+1:11:33 : over here so you can see that we are now
+1:11:35 : running our augmentation pipeline so
+1:11:38 : let's give that a second a run and then
+1:11:39 : we'll be able to test it out and see how
+1:11:42 : it all looks
+1:11:43 : cool so that is now done so you can see
+1:11:46 : that our code cell is successfully
+1:11:48 : completed doesn't look like we've got
+1:11:50 : any errors there so
+1:11:53 : there's this over here so i've actually
+1:11:55 : set it up so that if we've got invalid
+1:11:57 : annotations for whatever reason it's
+1:11:59 : actually going to drop them as well so
+1:12:01 : just keep it looks like we've dropped
+1:12:02 : out two images there perfectly fine
+1:12:04 : you're still gonna have a ton of data
+1:12:05 : which is why i set this to 60 up here
+1:12:08 : okay let's zoom back in so now if we go
+1:12:11 : into our org data if we're going to
+1:12:13 : train
+1:12:14 : and images
+1:12:16 : let's open that up yep all right we've
+1:12:18 : got a ton of images right
+1:12:20 : now if we go into our training folder
+1:12:23 : and if we go into labels we should have
+1:12:25 : a ton of json labels
+1:12:28 : there you go so this is what our
+1:12:30 : augmented labels look like so we've got
+1:12:32 : our bounding box which represents all of
+1:12:34 : our four coordinates we've got our image
+1:12:35 : and we've got our class
+1:12:37 : so we now have a ton of augmented data
+1:12:39 : and again you can see that our images
+1:12:40 : are now for 450 by 450 as well so this
+1:12:43 : is how to look at it manually let's just
+1:12:45 : double check test so we've got labels in
+1:12:47 : there
+1:12:48 : and we've got images and if we go into
+1:12:51 : val
+1:12:52 : should have labels perfect and we've got
+1:12:54 : images as well
+1:12:56 : all looking good
+1:12:58 : alrighty cool so that is looking good
+1:13:00 : for now you can save this so the next
+1:13:03 : thing we want to do is actually load
+1:13:05 : some augmented images and take a look at
+1:13:06 : them inside of tensorflow so this is
+1:13:10 : where it gets unpythonic i wasn't too
+1:13:12 : happy with what this code looks like but
+1:13:14 : it works okay so if you've got a better
+1:13:16 : method of actually going and building
+1:13:17 : these up again you could just loop
+1:13:19 : through and build this better
+1:13:21 : in the interest of getting this tutorial
+1:13:23 : out in time and showing you how to
+1:13:24 : actually do this
+1:13:26 : i actually went and just copied the code
+1:13:28 : three times and re-labeled the various
+1:13:29 : but it does work okay so we're now going
+1:13:32 : to load in our images into our
+1:13:33 : tensorflow data set so our training
+1:13:36 : images are going to be inside of a
+1:13:37 : variable called train images our test
+1:13:39 : images are going to be inside of a
+1:13:40 : folder called test images and our
+1:13:42 : validation images are going to be inside
+1:13:44 : of a folder called val images
+1:13:47 : all we're doing is exactly the same as
+1:13:48 : what we did right up at the start we're
+1:13:50 : using the
+1:13:52 : tf.data.dataset.listfiles method and
+1:13:54 : we're grabbing or using that wildcard
+1:13:56 : search to pick up data out of our train
+1:13:58 : folder inside of our augmented data
+1:14:00 : repository we're then using the load
+1:14:02 : image and we're using map to actually
+1:14:04 : load that image up we're then resizing
+1:14:06 : our image to be 120 pixels by 120 pixels
+1:14:09 : so we're compressing it even more and
+1:14:11 : the reason that we're doing this is that
+1:14:13 : we are able to make a more efficient
+1:14:15 : neural network that way so that means
+1:14:16 : there's less data that we need to pass
+1:14:18 : through to the neural net still seems to
+1:14:19 : work fine
+1:14:21 : and we're also scaling our image so
+1:14:22 : we're dividing it by 255
+1:14:25 : rather than our values being between 0
+1:14:27 : and 255 they're now going to be between
+1:14:29 : 0 and 1 which means that we can apply a
+1:14:32 : sigmoid activation to the final layer of
+1:14:34 : our neural network
+1:14:36 : okay and keep in mind we've set shuffle
+1:14:39 : equal to false here so really really
+1:14:40 : important because we're going to go and
+1:14:41 : load our labels in the same format so we
+1:14:43 : need them to be in the same structure
+1:14:45 : okay so that is our
+1:14:49 : those are our image pipelines now set up
+1:14:51 : so if we go and run this this this runs
+1:14:54 : pretty quickly
+1:14:55 : so if we get go and take a look at train
+1:14:57 : images dot uh as numpy iterator
+1:15:00 : dot next
+1:15:02 : so that is our image and you can see
+1:15:04 : that it's now much smaller values this
+1:15:06 : is because we've gone and scaled it over
+1:15:07 : here
+1:15:08 : cool right okay next thing what we want
+1:15:12 : to do is we actually want to go ahead
+1:15:13 : and prepare our labels so again we are
+1:15:15 : just going to write up a function to
+1:15:17 : load our labels so def load underscore
+1:15:20 : labels and we're going to be using this
+1:15:22 : similar to what we did for our images
+1:15:24 : with the map function inside of the
+1:15:26 : tensorflow dataset api so def load
+1:15:28 : underscore labels we're going to specify
+1:15:30 : the label path and we're really just
+1:15:31 : going to use a
+1:15:33 : with open statement here so with open
+1:15:35 : and we're going to grab the actual label
+1:15:37 : to grab that we need to use the dot
+1:15:39 : numpy function
+1:15:40 : we're going to read it in and return the
+1:15:42 : label over here and we're going to
+1:15:44 : extract the class and the bounding box
+1:15:46 : so what we're actually going to be
+1:15:47 : extracting is if i go into labels
+1:15:51 : we're going to be extracting the class
+1:15:53 : which is this and the bounding box which
+1:15:55 : is this so in this particular case that
+1:15:56 : there mustn't been a face in that
+1:15:59 : particular image that it's gone and
+1:16:00 : annotated hence why these are all zero
+1:16:02 : let's find another one it looks like
+1:16:04 : it's all zero
+1:16:07 : stop
+1:16:08 : all right so this one has got an actual
+1:16:09 : annotation so you can see we've got our
+1:16:11 : coordinates and we've got our class what
+1:16:13 : this is doing down here is it's just
+1:16:15 : going to return an array or that's
+1:16:17 : actually going to return two arrays one
+1:16:19 : of which returns the class so zero or
+1:16:21 : one and the second actually returns the
+1:16:23 : bounding box but again i'm going to show
+1:16:24 : you that in more detail in a second
+1:16:27 : okay so that is our label loading
+1:16:29 : function so we can go and run that
+1:16:31 : particular cell there
+1:16:33 : and then we're going to load the labels
+1:16:34 : to our tensorflow data set so this is uh
+1:16:36 : also key point to note that's step five
+1:16:38 : now done we're now up to step six which
+1:16:40 : is what we're doing right now all right
+1:16:41 : so step 602
+1:16:43 : we're going to use
+1:16:45 : tf.data.dataset.list files we're pretty
+1:16:46 : similar to what we did for our images
+1:16:48 : but this time we're going to be loading
+1:16:50 : our json objects and over here we're
+1:16:52 : just doing it for our train functions at
+1:16:54 : the moment and then we are going to use
+1:16:56 : the dot map function
+1:16:58 : this is weird so i had to do some
+1:17:01 : some screwing around to get the label
+1:17:02 : loading to work with the tensorflow data
+1:17:04 : set pipeline because it doesn't by
+1:17:06 : default render the actual
+1:17:08 : label but just know that i've wrapped it
+1:17:10 : inside of this tf.pi function here to
+1:17:12 : have
+1:17:13 : these strings available to our loading
+1:17:15 : function but it does work so
+1:17:18 : train underscore labels.map we're
+1:17:19 : passing through using a lambda function
+1:17:21 : so that means it's going to loop through
+1:17:22 : each individual file name we're then
+1:17:24 : wrapping it inside a tf.pi underscore
+1:17:27 : function
+1:17:28 : and we're using this load labels method
+1:17:30 : over here
+1:17:31 : to that we're going to be passing
+1:17:32 : through our labels uh our file paths
+1:17:35 : which is what we're getting let me
+1:17:37 : actually show you this let's run this
+1:17:38 : first
+1:17:40 : i'll try and explain too much so train
+1:17:42 : underscore labels
+1:17:43 : dot as numpy iterator dot next
+1:17:48 : all right so you can see we're getting
+1:17:49 : the full file path to that particular
+1:17:51 : json object this is going to be passed
+1:17:53 : through to this so ignore all the
+1:17:55 : complexity that you're seeing here just
+1:17:57 : know that this particular file path is
+1:17:59 : being passed through to this with open
+1:18:01 : statement and we're going to be
+1:18:02 : returning our annotations back
+1:18:06 : okay so that is that now done so let's
+1:18:09 : go and run this
+1:18:11 : and then we are going to do it for our
+1:18:13 : test labels and we're going to do it for
+1:18:14 : our vat labels again non-pythonic
+1:18:17 : and duplication of code i know but it
+1:18:19 : definitely does work okay so those are
+1:18:21 : our labels let's actually take a look at
+1:18:23 : those so if i go to train labels
+1:18:26 : train underscore labels dot as numpy
+1:18:28 : iterator dot next
+1:18:32 : you can see that we have two values
+1:18:34 : being returned so we've got this array
+1:18:36 : or this first array which is the class
+1:18:38 : so face or not face and then we've got
+1:18:40 : this second value over here which is our
+1:18:42 : set of coordinates
+1:18:44 : so we are looking i was just noticing
+1:18:46 : there's a ton of sun coming in this way
+1:18:48 : now but that's fine
+1:18:49 : okay so those are our labels and our
+1:18:52 : images now loaded so we've gone through
+1:18:55 : and run our
+1:18:56 : load labels function over each value or
+1:18:58 : each json object or file path inside of
+1:19:00 : that data set and we've gone and loaded
+1:19:02 : it using that load labels function
+1:19:05 : the next thing that we need to do is
+1:19:06 : just combine our label and our image
+1:19:08 : samples
+1:19:09 : so
+1:19:10 : think about when you go and train
+1:19:11 : something like scikit-learn or inside of
+1:19:13 : a different
+1:19:14 : machine learning framework normally you
+1:19:16 : you'll have the input features and the
+1:19:18 : labels right right now we've got them
+1:19:20 : separate so we've got images over here
+1:19:21 : and we've got labels over here my hands
+1:19:23 : aren't inside of the frame so we've got
+1:19:25 : them separate we want to combine them so
+1:19:27 : that it represents one sample so the
+1:19:28 : input features and the labels so first
+1:19:31 : thing that we're going to do is just
+1:19:32 : check our partition length so i'm just
+1:19:33 : printing out the length of each one of
+1:19:35 : these partitions
+1:19:36 : so our training images or our training
+1:19:38 : images and labels we've got
+1:19:40 : 3720 samples for testing we've got 840
+1:19:44 : and for validation we've got 720. kind
+1:19:46 : of crazy right so we've gone from
+1:19:49 : having uh what was it 90 images to what
+1:19:53 : is that well over 4 000 probably
+1:19:55 : approaching 5 000 samples kind of crazy
+1:19:57 : i think it's absolutely amazing
+1:19:59 : okay so that is checking our lengths
+1:20:02 : then the next thing that we need to do
+1:20:03 : is actually join these up so again i'm
+1:20:05 : just repeating this three times for
+1:20:07 : train test and valve if you've got a
+1:20:08 : more pythonic way to do it let me know
+1:20:10 : update it and i'll um i'll hook you guys
+1:20:12 : up and and we'll push it into the repo
+1:20:14 : but um just know that this does work so
+1:20:16 : we're going to be doing our training
+1:20:17 : testing and validation samples
+1:20:20 : okay so what are we doing here so we're
+1:20:22 : using the zip method to combine these so
+1:20:24 : we're effectively going to be
+1:20:26 : combining each one of the examples in
+1:20:28 : each one of these data sets so the zip
+1:20:30 : method effectively allows you to build
+1:20:32 : that type of generator
+1:20:34 : so training equals tf.dataset.zip
+1:20:37 : and then to that inside of parentheses
+1:20:39 : we're finding it passing our training
+1:20:40 : images and our training labels then
+1:20:43 : we're going to shuffle it up and ideally
+1:20:44 : you want the shuffle buffer to be bigger
+1:20:46 : than the size of the data set so we can
+1:20:49 : actually drop this down we could make
+1:20:50 : this 4000 over here 5000 should be fine
+1:20:53 : for now
+1:20:54 : i think i had more images when i was
+1:20:55 : building this up and then we're going to
+1:20:57 : batch it up so this means that we're
+1:20:58 : going to have each batch is going to be
+1:21:00 : represented as
+1:21:01 : eight images and eight labels
+1:21:03 : so train equals train dot batch and then
+1:21:06 : we're passing eight to that and then
+1:21:07 : we're going to prefetch so this helps
+1:21:09 : eliminate bottlenecks when you're
+1:21:10 : loading and training your data so train
+1:21:12 : equals train.prefetch for and then we're
+1:21:14 : doing pretty much the same thing for our
+1:21:16 : testing partition and our validation
+1:21:18 : partition so if we go and run these
+1:21:20 : boom boom boom all things holding equal
+1:21:22 : we're looking good so now if we go and
+1:21:23 : run train
+1:21:25 : and i know there's a lot of data
+1:21:26 : pre-processing guys this is just part of
+1:21:28 : the part of the deep learning process
+1:21:30 : the train dot as numpy iterator
+1:21:33 : dot next
+1:21:35 : we should now get eight images eight
+1:21:38 : annotations
+1:21:40 : so if we go and grab the first thing dot
+1:21:42 : shape
+1:21:44 : should be eight by 450 by 450 by three
+1:21:46 : oh actually by 120 because we've gone
+1:21:48 : and resized it as well so we've got
+1:21:50 : eight images by 120 pixels wide by 120
+1:21:53 : pixels higher by three channels because
+1:21:55 : it is a colored image if we go and type
+1:21:58 : in dot one here it should return the
+1:21:59 : label
+1:22:02 : uh
+1:22:03 : it might not be a numpy array that's
+1:22:05 : fine
+1:22:09 : yeah cool so we've got all of our
+1:22:11 : different classes and we've now got all
+1:22:13 : of our bounding boxes down here you can
+1:22:15 : see we've got some zero samples so some
+1:22:17 : negative samples over there
+1:22:19 : over there looking good all right cool
+1:22:21 : that is our data set now done now before
+1:22:24 : we go on and start doing some deep
+1:22:26 : learning let's actually go and view
+1:22:27 : these so we'll grab one sample so again
+1:22:29 : you've seen me write this a few times so
+1:22:31 : train dot as numpy iterator allows you
+1:22:33 : to loop through all of the different
+1:22:34 : batches so data underscore samples
+1:22:37 : equals train dot as numpy iterator so if
+1:22:39 : we run that
+1:22:40 : and then we can grab the next batch so
+1:22:43 : res equals data underscore samples so
+1:22:45 : what we're grabbing from here dot next
+1:22:47 : to grab the next batch
+1:22:49 : might take a little while
+1:22:50 : and then we can actually go and plot it
+1:22:52 : out so if i go and run this boom look at
+1:22:54 : that so we've actually got our images
+1:22:57 : annotated and
+1:22:58 : augmented pretty cool right so if we go
+1:23:00 : let me zoom out a little bit so you can
+1:23:02 : see that a bit better
+1:23:03 : how cool is that so if we go and run
+1:23:05 : another sample
+1:23:07 : look at that so we've now got a ton of
+1:23:09 : augmented data
+1:23:14 : and you can see some of them are darker
+1:23:15 : some of them are lighter because keep in
+1:23:17 : mind remember we had a random brightness
+1:23:20 : function inside of our augmentation
+1:23:21 : function so all of this hard work has
+1:23:24 : led us to this
+1:23:26 : looking pretty good though right
+1:23:32 : and again you can keep running the data
+1:23:34 : dot underscore samples.next to keep
+1:23:36 : getting the next batch so that's
+1:23:38 : effectively
+1:23:39 : what i'm doing eventually i'll reach to
+1:23:41 : the point where i've gone through all
+1:23:42 : the batches and it'll return none so if
+1:23:43 : you run this too many times you'll get
+1:23:45 : to the end in that particular case just
+1:23:47 : run this again
+1:23:48 : to regenerate or restart the uh the
+1:23:51 : iterator and then you can go and grab
+1:23:53 : the next batch again i can keep running
+1:23:55 : through it
+1:23:57 : okay but that is our data pre-processing
+1:23:59 : now done so i know we did
+1:24:01 : a absolute ton of stuff in there and
+1:24:04 : wrote a ton of code or went through a
+1:24:05 : ton of code
+1:24:07 : so just know we've gone and successfully
+1:24:09 : reviewed our data set and built our
+1:24:11 : image loading function we've gone and
+1:24:13 : partitioned it and remember we did that
+1:24:14 : manually we've then gone and applied
+1:24:16 : albumentations for our augmentation
+1:24:18 : pipeline we've then gone and built our
+1:24:20 : augmentation pipeline and generated a
+1:24:23 : ton of data so we've now got what
+1:24:25 : 3720 let's zoom in so we can see this a
+1:24:28 : bit better
+1:24:30 : so we've now got
+1:24:32 : 3720 examples in our train 840 in test
+1:24:36 : and 720 in val
+1:24:37 : and we've gone and created our final
+1:24:39 : data sets which we've gone and
+1:24:40 : visualized down here and this is all
+1:24:42 : just done using matplotlib so again
+1:24:43 : we're using subplots and we're drawing a
+1:24:46 : rectangle using opencv and then using
+1:24:48 : i'm show to actually visualize the image
+1:24:50 : okay that is our
+1:24:53 : data set now done let's jump back on
+1:24:55 : over to our client and see what's next
+1:25:00 : so we're on to the fun bit deep learning
+1:25:03 : so how are we building this well if you
+1:25:05 : think about it object detection really
+1:25:07 : has two parts classification so
+1:25:09 : determining what the object is and that
+1:25:11 : can really be thought of as a binary
+1:25:13 : classification problem and finding the
+1:25:15 : coordinates for the bounding box so x1
+1:25:18 : y1 x2 y2 so on and so forth now that
+1:25:21 : second part of the problem is actually a
+1:25:23 : regression problem interesting
+1:25:26 : yep so that's exactly what we're going
+1:25:28 : to build we're going to use a vgg16 base
+1:25:30 : architecture and add on our final
+1:25:32 : prediction layers one for classification
+1:25:34 : and one for regression in order to do
+1:25:36 : object detection sweet but how do you
+1:25:38 : train it then i thought the keras
+1:25:40 : sequential method expects one input and
+1:25:42 : one output and one loss function you're
+1:25:44 : mostly right we're actually going to use
+1:25:46 : the functional api for this model this
+1:25:48 : will allow us to have two different loss
+1:25:49 : functions and combine them in the end
+1:25:51 : one for the classification model and one
+1:25:53 : for the regression model the latter will
+1:25:54 : actually be called localization lost and
+1:25:56 : we'll write this function ourselves huh
+1:25:58 : nice i guess let's do it then all right
+1:26:00 : he just went and had some lunch it's
+1:26:02 : time to wrap this up so our client gave
+1:26:04 : me a lunch break it is time to build our
+1:26:07 : deep learning model
+1:26:09 : okay so i'm gonna delve into this now so
+1:26:11 : step eight we have what do we have four
+1:26:13 : steps that we need to do so we're gonna
+1:26:15 : import our layers and our base network
+1:26:17 : now what i mean by base network is this
+1:26:20 : bad boy over here so
+1:26:22 : let's quickly take a look i think i've
+1:26:23 : got a bunch of extras here
+1:26:26 : we'll go back through this so for now
+1:26:28 : what we're going to do is first up
+1:26:30 : import the model class so from
+1:26:32 : tensorflow.keras.models
+1:26:34 : import model so this is the base or what
+1:26:37 : all of the tensorflow models are built
+1:26:39 : from right
+1:26:40 : then we're importing a number of layers
+1:26:43 : and i probably should clean this up but
+1:26:44 : for now just know that we're going to
+1:26:46 : import layers so from
+1:26:47 : tensorflow.layers actually let's take a
+1:26:49 : look i'll clean this up so on the fly so
+1:26:52 : we're using
+1:26:53 : input vgg to do so i think we can get
+1:26:57 : rid of flatten yep we don't need that we
+1:26:59 : don't need add
+1:27:00 : i don't think we've got dropout let's
+1:27:02 : clean this up we don't need that we
+1:27:04 : don't need relu
+1:27:07 : yeah perfect all right cool i just want
+1:27:08 : to make this super clear for you guys so
+1:27:10 : you you're not looking at this and like
+1:27:11 : why the hell did he import that okay
+1:27:13 : that's what we're going to import so
+1:27:15 : from tens floater carousel models import
+1:27:17 : models so that's our base model class
+1:27:19 : for our layers so from
+1:27:20 : tensorflow.keras.layers import input
+1:27:23 : conf 2d max pooling 2d dense and global
+1:27:26 : max pooling 2d wait did we use that oh
+1:27:29 : gosh
+1:27:30 : you guys are going to shoot me and we
+1:27:32 : didn't use max pooling we used global
+1:27:34 : maxwell okay get rid of that as well
+1:27:36 : there you go nice and simple
+1:27:39 : okay so we've got import com 2d dance
+1:27:41 : global max pulling to i guess the reason
+1:27:42 : that i've got those layers is as i'm
+1:27:44 : prototyping this for you i'm like
+1:27:45 : testing out a bunch of stuff and like
+1:27:47 : trying to build specific types of neural
+1:27:49 : networks so if ever you see stuff in
+1:27:51 : there and you're like he's got extra
+1:27:52 : things
+1:27:53 : i'm not using this that's probably why
+1:27:56 : okay so these are our layers and then
+1:27:58 : we're going to import a vg g16 so this
+1:28:00 : big bad boy so vgg16 is a huge neural
+1:28:04 : net or reasonably big neural network
+1:28:06 : that i built believe was built for
+1:28:09 : image classification and it's got
+1:28:11 : a bunch of convolutional neural networks
+1:28:13 : so that's what vgg16 looks like the nice
+1:28:16 : thing about
+1:28:17 : keras is that we can actually pick this
+1:28:19 : up and use it so we're actually going to
+1:28:21 : cut it off here and pass from this big
+1:28:23 : block over there into our specific
+1:28:25 : regression model so
+1:28:27 : this is obviously been pre-trained as
+1:28:29 : well so you don't you can leverage that
+1:28:30 : knowledge inside of that neural network
+1:28:32 : and this is how it's intended to be used
+1:28:34 : so let's first up import this
+1:28:36 : now
+1:28:37 : what we need to do is create an instance
+1:28:38 : of vgg so what we can do is write vgg
+1:28:41 : equals vgg and this is standard
+1:28:43 : architecture actually good good segue so
+1:28:46 : a lot of the time i get comments on nick
+1:28:48 : how did you design this neuron net how
+1:28:50 : like how do i pick the number of units
+1:28:53 : now a large part of this is based on
+1:28:55 : research that's out there so i'll go
+1:28:57 : back and i'll take a look at different
+1:28:58 : types of neural networks and go hey
+1:29:00 : they've built it like this maybe i can
+1:29:01 : tweak it for these particular sections
+1:29:04 : and get my output
+1:29:06 : in this particular example i think i
+1:29:07 : started off with the ssd architecture so
+1:29:09 : if you've ever seen the tensorflow
+1:29:12 : object detection course that i've got
+1:29:14 : then
+1:29:15 : this is the model that we actually used
+1:29:17 : for that so we used a ssd model for
+1:29:20 : object detection so
+1:29:22 : and you can see there that the ssd model
+1:29:25 : is using vgg16 so i was like
+1:29:28 : why not capitalize of what the greats
+1:29:30 : have done and we'll use vgg16 as well
+1:29:32 : and that's exactly what i've done so but
+1:29:34 : obviously it's not exactly the same as
+1:29:36 : this we've gone and tweaked it so we are
+1:29:38 : going to be using vgg16 and that's the
+1:29:40 : first thing so vgg
+1:29:42 : and i'll probably explain a little bit
+1:29:43 : more as to why i've made certain other
+1:29:45 : design decisions as well but just just
+1:29:47 : bear with me for now i'm going to go
+1:29:48 : into this so vgg equals vgg16 and then
+1:29:51 : i'm saying include top equals false so
+1:29:54 : the final couple of layers in vgg16 we
+1:29:57 : don't actually need because we're going
+1:29:58 : to apply our own so we don't need all
+1:30:00 : this stuff here because remember our
+1:30:02 : object detection model is really two
+1:30:03 : models it's a classification model and a
+1:30:05 : regression model the vgg16 model is
+1:30:08 : actually a classification model so we
+1:30:09 : need to get rid of those final
+1:30:11 : classification layers and sub it for our
+1:30:13 : own
+1:30:14 : final layers which is exactly what
+1:30:16 : you're going to see in a set so
+1:30:18 : vggx vgg16 and include top gets rid of
+1:30:21 : those final layers so we're gonna run
+1:30:23 : that and then we can actually take a
+1:30:24 : look at the vgg model keep in mind if
+1:30:27 : you haven't run this ever before it's
+1:30:29 : going to take a little while to download
+1:30:30 : i can't remember i think it took me like
+1:30:32 : three minutes on my net which is slow as
+1:30:34 : hell um so vgg dot summary is going to
+1:30:37 : actually show you what the neural
+1:30:38 : network looks like and see the beauty of
+1:30:40 : this is that this is actually a pretty
+1:30:41 : big neural network so what is it like
+1:30:43 : 14.7 million parameters
+1:30:46 : we don't need to go and train this
+1:30:47 : obviously we're going to fine tune it
+1:30:48 : but this is already giving us a bunch of
+1:30:51 : knowledge inside of our model because
+1:30:52 : it's been built for image classification
+1:30:54 : and it's already got a number of
+1:30:56 : convolutional neural network layers in
+1:30:57 : there so you can see we've got a conf 2d
+1:31:00 : layer there which has 64 um layers
+1:31:02 : they're all 64 kernels we've got a max
+1:31:04 : pooling layer so that bring or condenses
+1:31:06 : that information down again cons layers
+1:31:08 : comp layers max pooling convolutions
+1:31:10 : convolutions max pooling now
+1:31:12 : on the end here so you can see that
+1:31:14 : we've got none none none none 512. so
+1:31:17 : effectively what this is going to become
+1:31:19 : is 120 or whatever at the original image
+1:31:22 : is so 120 by 120 by 512 and obviously
+1:31:25 : this might get changed or tweaked
+1:31:27 : tweaked a bit depending on what types of
+1:31:29 : inputs and what other transformations
+1:31:30 : have been done but this is what these
+1:31:32 : nuns represent so the number of samples
+1:31:34 : plus the
+1:31:36 : uh effectively the
+1:31:38 : what is it with plus height and then the
+1:31:40 : number of channels but this is obviously
+1:31:42 : going to get transformed a bunch
+1:31:43 : depending on whether or not the padding
+1:31:44 : is set to same but just know we're going
+1:31:46 : to be taking a really bulletproof
+1:31:48 : architecture we're going to plug be
+1:31:50 : plugging it into our object detection
+1:31:52 : model so that's the beauty of it
+1:31:54 : so that's vg dot summary so again you
+1:31:56 : can use dot summary to get information
+1:31:58 : about a whole bunch of different types
+1:31:59 : of neural networks inside of keras so
+1:32:02 : let's build our neural network so
+1:32:04 : let's run this
+1:32:06 : so what we've actually gone and done is
+1:32:08 : let me show you so first up what we're
+1:32:09 : doing is we're specifying an input layer
+1:32:11 : so whenever you're building a neural
+1:32:13 : network remember you need to have a
+1:32:14 : bunch of inputs and either an output or
+1:32:16 : multiple outputs so let's start with the
+1:32:19 : top and the bottom first so our input
+1:32:21 : layer is going to be an input which is
+1:32:24 : using this input class up here and this
+1:32:26 : is actually using i believe this is
+1:32:28 : using the functional api which gives you
+1:32:30 : a little bit more flexibility so we're
+1:32:31 : using an input and our shape is going to
+1:32:34 : be 120 pixels by 120 pixels by 3 pixels
+1:32:38 : don't worry about any of this now let's
+1:32:40 : take a look at our output so our outputs
+1:32:42 : are specified over here
+1:32:44 : so we've got two outputs we've got a
+1:32:46 : classification output and a regression
+1:32:48 : output now
+1:32:50 : how crazy is that that matches to what
+1:32:52 : our annotations look like remember we've
+1:32:54 : got one output for our classification
+1:32:56 : let's take a look so if i go and type
+1:32:58 : train dot as numpy iterator dot next
+1:33:03 : and let's go and grab our outputs
+1:33:10 : a look at that so we've got a
+1:33:13 : classification output so 1 0 1 0 1 0 and
+1:33:16 : then we've got some regression outputs
+1:33:17 : which are four different values now
+1:33:20 : let's go back and break this down a
+1:33:21 : little bit so our classification is
+1:33:24 : mapping to class 2 which is class 2 over
+1:33:26 : here and that particular layer is a
+1:33:29 : dense layer which has one output so that
+1:33:31 : means it's going to app one value and
+1:33:33 : because it has an activation of sigmoid
+1:33:35 : that means it's going to be a value
+1:33:37 : between 0 and 1. remember that
+1:33:39 : activation acts like a modifier to the
+1:33:41 : output of a neural network so if we take
+1:33:43 : a look at our sigmoid layer
+1:33:47 : i want sigmoid
+1:33:48 : activation actually that's it this is
+1:33:51 : what a sigmoid activation looks like it
+1:33:53 : takes any input and it maps it through
+1:33:55 : to a value between zero you can see that
+1:33:57 : zero is the bottom value on our y axis
+1:33:59 : and one so that's what's going to happen
+1:34:02 : which just so happens to be
+1:34:04 : 0 and 1 in terms of our classes
+1:34:08 : now our dense layer is going to be over
+1:34:10 : here so if we take a look at our sorry
+1:34:12 : our regression layer
+1:34:14 : our second output is going to be regress
+1:34:16 : 2 which is regress 2 that particular
+1:34:18 : layer has four outputs which also has an
+1:34:21 : activation of sigmoid
+1:34:23 : we've got four outputs in our labels and
+1:34:26 : remember they're scaled between zero and
+1:34:28 : one because we've gone and divided it by
+1:34:30 : the dimensions of our image
+1:34:32 : that is effectively the crux of building
+1:34:34 : neural networks focus on the input and
+1:34:37 : getting to the output and then you can
+1:34:39 : tweak what happens in the middle so you
+1:34:41 : can tweak the hidden layers now
+1:34:44 : in terms of our hidden layers let's
+1:34:45 : actually go and take a look at what's
+1:34:46 : happening in the
+1:34:48 : middle of our neural network now so once
+1:34:51 : we've taken in our input of 120 pixels
+1:34:53 : by 120 by 3
+1:34:55 : then we're taking that input layer and
+1:34:57 : we're passing it through to our vgg g16
+1:34:59 : layer so you can see here we're
+1:35:01 : instantiating vjj as vgg16 and we're
+1:35:04 : including or we're specifying include
+1:35:06 : top equal to false because we want to
+1:35:08 : drop off those final layers
+1:35:10 : through that we're going to be passing
+1:35:11 : through our input layer so you can see
+1:35:13 : that we're what we're actually doing is
+1:35:14 : we're creating we're doing two things
+1:35:16 : here we're creating the layer and we're
+1:35:18 : telling the layer what we're going to be
+1:35:20 : passing through to it from our neural
+1:35:22 : network so effectively we're going this
+1:35:23 : is our input layer input layer goes to
+1:35:25 : our vgg layer and then our vgg layer is
+1:35:28 : going to be put into something else this
+1:35:30 : is how the neural network is stacked up
+1:35:33 : right so input layer vgg
+1:35:35 : and then here we've actually got two
+1:35:37 : effectively two different output heads
+1:35:38 : or prediction heads that's what people
+1:35:40 : typically refer to the final outputs of
+1:35:43 : a neural network right so we've got two
+1:35:44 : prediction heads this first prediction
+1:35:47 : head over here is actually our
+1:35:48 : classification model
+1:35:53 : and what we're doing is we're first up
+1:35:55 : condensing all of the information from
+1:35:57 : our vgg layer using the global max
+1:36:00 : pooling 2d layer think of this as taking
+1:36:03 : or looking across all of the different
+1:36:05 : channels in our vgg output and
+1:36:07 : condensing it and only returning the max
+1:36:09 : values so what will end up happening is
+1:36:12 : that rather than having all of the
+1:36:13 : dimensions from this 512 layer or this
+1:36:16 : layer here we're effectively just going
+1:36:17 : to get 512 values back and these are
+1:36:20 : going to be the max values out of each
+1:36:22 : one of these channels across the board
+1:36:25 : so we're then going to take that output
+1:36:27 : which is now stored in a value called f1
+1:36:30 : and we're going to be passing that
+1:36:31 : through through a fully connected layer
+1:36:33 : so that f1 value which represents the
+1:36:36 : output from our vg16 layer goes to a
+1:36:38 : dense layer which has 2048 units with an
+1:36:41 : activation of relu that value which is
+1:36:43 : now stored inside of class 1 gets passed
+1:36:45 : to our final classification layer which
+1:36:47 : is class 2. i've just called it class 2
+1:36:50 : because classification second layer you
+1:36:52 : sort of get the idea remember that's got
+1:36:54 : the one output because it maps back down
+1:36:56 : to here
+1:36:57 : now likewise we've got our regression
+1:36:59 : model here so this think of this is our
+1:37:00 : bounding box
+1:37:03 : model
+1:37:03 : this is again going to take in our vgg
+1:37:06 : outputs you can see that there and we're
+1:37:08 : again going to apply max pooling 2d
+1:37:11 : then that output which is now stored
+1:37:12 : inside of f2 goes to a regression oh
+1:37:15 : this should actually be f2 down here
+1:37:16 : that's actually an error so f2 comes
+1:37:19 : from over here gets passed into this
+1:37:20 : layer
+1:37:21 : so that now means that we are going to
+1:37:23 : be taking our vgg outputs passing it
+1:37:26 : through to f2 and what we'll get out of
+1:37:27 : this is regression one is then going to
+1:37:30 : be represented as a dense layer of 2048
+1:37:33 : units with an activation of relu and
+1:37:35 : then that regress one value goes to our
+1:37:37 : final regression layer which means
+1:37:38 : inside of regression two we've got a
+1:37:41 : dense layer with four units an
+1:37:43 : activation of sigmoid which maps through
+1:37:45 : to our bounding box coordinates down
+1:37:47 : here so all in all think about that as
+1:37:49 : this so we've got an input which goes
+1:37:51 : through a massive classification model
+1:37:54 : and then those two outputs get broken
+1:37:56 : down into a classification model and a
+1:37:58 : bounding box model and then we combine
+1:38:00 : it all together using the model api down
+1:38:03 : here so model is over there
+1:38:06 : to that model we basically pass through
+1:38:08 : what our inputs are going to be which is
+1:38:09 : our input layer and what our outputs are
+1:38:11 : going to be which is going to be the
+1:38:12 : class 2
+1:38:13 : outputs of the class 2 model and outputs
+1:38:16 : of the regress to layer
+1:38:17 : pretty cool right and then we return
+1:38:19 : that back so now if we run this
+1:38:21 : we've effectively instantly or we've
+1:38:23 : created a function which instantiates
+1:38:24 : our model so we can actually go and
+1:38:26 : create an instance of it now which is
+1:38:28 : what we'll do inside of 8.4 so we can
+1:38:30 : use face tracker under or equals build
+1:38:32 : underscore model so we're actually going
+1:38:34 : to be running this build model function
+1:38:36 : because remember that returns our neural
+1:38:37 : network
+1:38:39 : and then we can actually take a look at
+1:38:41 : that neural network so
+1:38:42 : let's uh disable scrolling
+1:38:45 : all right so let's take a look at this
+1:38:46 : so we've got our input layer over here
+1:38:48 : which is 120 by 120 by 3
+1:38:51 : that gets passed through to our vgg16
+1:38:53 : layer which remember is going to be 99
+1:38:55 : and then 512 but it's really getting
+1:38:57 : this output over here and then a global
+1:38:59 : max pooling layer is reducing the
+1:39:01 : outputs of this vgg 16 layer rather than
+1:39:03 : going 99512 it goes to 512 outputs so
+1:39:07 : based on each sample
+1:39:09 : these two values then get passed to our
+1:39:12 : true dense layers so over here this is
+1:39:14 : or one this first one over here is the
+1:39:16 : output from our classification model
+1:39:19 : so that then gets passed to dense one
+1:39:21 : which gives us our classification output
+1:39:23 : which is just one value this dense layer
+1:39:25 : over here you can actually specify names
+1:39:26 : for this so it's a lot clearer which
+1:39:28 : layer maps to which but i haven't done
+1:39:30 : it here so dense two is going to be 2048
+1:39:32 : values which again maps to four bounding
+1:39:34 : box values all in all our neural network
+1:39:37 : is 16.8 million parameters so quite big
+1:39:41 : okay that is our neural network now done
+1:39:43 : now just remember like when i'm actually
+1:39:45 : designing these i'm thinking about
+1:39:46 : what's been done in the past can we
+1:39:47 : leverage that information and what does
+1:39:50 : our final output need to look like
+1:39:51 : that's the core crux of how to build
+1:39:53 : these
+1:39:54 : okay that's our summary taking a look at
+1:39:56 : we've taken a look at that
+1:39:58 : so we can now go and grab a sample out
+1:40:00 : of our training pipeline
+1:40:03 : and that is going to unpack x so x will
+1:40:05 : be our images y will be our labels we
+1:40:07 : can view that so x again images
+1:40:11 : y labels cool
+1:40:13 : now we can take a look at x dot shape so
+1:40:15 : again 8 by 120 by 120 can take a look
+1:40:18 : and actually pass this through to our
+1:40:20 : face tracker model so face tracker dot
+1:40:21 : predict and we're passing through our
+1:40:23 : images so ideally what we'll get out of
+1:40:25 : that is our classes and our coordinates
+1:40:27 : right now we haven't trained it so it's
+1:40:29 : going to be crap but this is ideally how
+1:40:31 : you're going to use it in the end if i
+1:40:33 : go and run that now
+1:40:35 : we should get some predictions so that
+1:40:37 : might take a little second
+1:40:39 : and if we go and print it out take a
+1:40:40 : look so we're now getting all of our
+1:40:43 : classification outputs as this first
+1:40:44 : value and all of our coordinate values
+1:40:47 : as this second value so once we go on
+1:40:49 : train it should learn how to estimate
+1:40:52 : these and return values which are closer
+1:40:54 : to the actual outcomes or the closer
+1:40:56 : classification outputs and the closer
+1:40:58 : bounding box outputs so that is step
+1:41:00 : eight now done so we've actually gone
+1:41:01 : and now successfully built our neural
+1:41:03 : network but keep in mind because we've
+1:41:05 : got two outputs we actually need to do a
+1:41:08 : little bit of tweaking when we go and
+1:41:09 : train because we need a specific loss
+1:41:11 : function for our classification model
+1:41:13 : and a specific one for our regression
+1:41:14 : model so that's what we'll do in a sec
+1:41:17 : but just know we've now gone and
+1:41:18 : successfully built our neural network we
+1:41:20 : are now up to step nine defining our
+1:41:22 : losses so first up our losses in our
+1:41:25 : optimizer first up what we're going to
+1:41:26 : do is we are going to specify
+1:41:28 : what our learning rate decay is going to
+1:41:30 : be and again i didn't get too fancy on
+1:41:33 : this i think i actually found out how to
+1:41:34 : calculate this from stack overflow but
+1:41:36 : basically what we're specifying here is
+1:41:38 : how to decrease the learning rate in
+1:41:40 : such a way that we're 75 of the original
+1:41:42 : learning rate after each epoch so this
+1:41:44 : means that we'll slow down the learning
+1:41:46 : so ideally we don't overfit and we don't
+1:41:49 : blow out our gradients um first thing we
+1:41:51 : need to work out is how many batches
+1:41:53 : we've got within a
+1:41:55 : within our training data server so if i
+1:41:56 : type in len
+1:41:58 : train
+1:42:01 : we have 465 so what we need to do is
+1:42:03 : replace this value here so batches per
+1:42:05 : epoch should be 465.
+1:42:07 : we could actually even just set it to
+1:42:09 : this right so that way it's correct each
+1:42:11 : time and this is going to specify a
+1:42:13 : learning rate and then what we're going
+1:42:15 : to do is set up our optimizer so we're
+1:42:16 : going to be using the atom optimizer so
+1:42:18 : think about it your optimizer is working
+1:42:20 : out how to go and apply gradients and
+1:42:22 : effectively apply backprop across our
+1:42:24 : neural network so opt equals
+1:42:26 : tf.keras.opt
+1:42:29 : and then to that we're going to pass
+1:42:30 : through our learning rate which is going
+1:42:31 : to be 0.001
+1:42:33 : zero zero zero one and then our decay is
+1:42:36 : going to be this decay value over here
+1:42:37 : so if i actually show you this
+1:42:40 : decay so that is effectively how much
+1:42:42 : our learning rate is going to drop each
+1:42:44 : time we've gone through one particular
+1:42:45 : epoch
+1:42:47 : again you could just plug in a value
+1:42:49 : here as well if you wanted to if you
+1:42:50 : didn't want to go and do this calc
+1:42:52 : okay so
+1:42:53 : then what we're going to do is we're
+1:42:54 : going to create our localization loss so
+1:42:55 : let me actually show you what this looks
+1:42:57 : like so localization
+1:42:59 : loss
+1:43:04 : i saw a really good formula for it i
+1:43:06 : think it was this one
+1:43:08 : yeah
+1:43:09 : take a look so basically what we're
+1:43:10 : actually calculating here is
+1:43:12 : this component so the this bit
+1:43:15 : and this bit
+1:43:16 : now we're not
+1:43:18 : we're not square rooting it that's
+1:43:20 : perfectly fine so effectively what we're
+1:43:21 : doing is we are getting our
+1:43:25 : distance between our actual coordinate
+1:43:27 : and our predicted coordinate so this is
+1:43:29 : what this line over here is doing so
+1:43:31 : what we're doing is we're getting our y
+1:43:34 : true value which is going to be our
+1:43:36 : first coordinate minus our second
+1:43:38 : coordinate and this is going to do our x
+1:43:40 : and y at the same time so we're then
+1:43:42 : going and squaring the difference and
+1:43:44 : we're reducing the sum so we're
+1:43:46 : effectively summing it all back up
+1:43:47 : together and that gives us our delta
+1:43:49 : value over here
+1:43:50 : then we're calculating
+1:43:52 : our actual height of the box the actual
+1:43:55 : width of the box
+1:43:56 : the predicted height of the box and the
+1:43:58 : predicted width of the box and we're
+1:44:00 : doing the pretty much the same thing
+1:44:02 : that you're seeing down here so we're
+1:44:03 : getting the
+1:44:04 : true width minus the predicted width
+1:44:06 : we're squaring it we're then getting the
+1:44:08 : true height minus the predicted height
+1:44:10 : we're squaring it we're adding both of
+1:44:12 : those two values together so you can see
+1:44:13 : the plus there and then we're using
+1:44:15 : tf.reduce sum to reduce that value into
+1:44:18 : a single outcome which gives us the
+1:44:20 : value delta size
+1:44:22 : so the difference between the
+1:44:23 : coordinates is stored inside of a
+1:44:24 : variable called delta colored so delta
+1:44:26 : coord plus delta size gives us our
+1:44:28 : localization loss which is what we're
+1:44:30 : returning down here so return delta
+1:44:32 : coord plus delta size so if i go and run
+1:44:34 : that
+1:44:36 : and then we go and test it out or we
+1:44:37 : actually go and create variables for
+1:44:39 : those so classification loss is then
+1:44:41 : going to be passed through to our
+1:44:42 : training pipeline and regression loss is
+1:44:44 : going to be set to our localization loss
+1:44:46 : so the classification last keep in mind
+1:44:48 : is going to be binary cross entry
+1:44:50 : because it's just a classification
+1:44:51 : problem right we don't need to get fancy
+1:44:53 : there but we could if we wanted to and
+1:44:55 : then we're going to test it out so our
+1:44:56 : localization loss we can pass through
+1:44:58 : our bounding box coordinates so we're
+1:44:59 : going to test against y1 which is what
+1:45:01 : we had from over here
+1:45:03 : and we're going to pass through our
+1:45:04 : coordinates
+1:45:06 : that looks okay so if we type in dot
+1:45:07 : numpy we get the actual value which is
+1:45:10 : going to be 6.0 what is that five to
+1:45:12 : begin with but again we haven't trained
+1:45:14 : our neural network so it's gonna be
+1:45:15 : pretty crappy to begin with
+1:45:18 : okay and we can test out uh
+1:45:19 : classification loss which is gonna be
+1:45:21 : binary cross entropy so in this
+1:45:23 : particular case it's 0.584 and again to
+1:45:25 : get that value you can just type in
+1:45:27 : numpy boom
+1:45:29 : okay that's looking good um and we we
+1:45:32 : don't have a well this is regression
+1:45:34 : loss so it's going to effectively be the
+1:45:35 : same as localization loss but
+1:45:38 : 6.05
+1:45:39 : okay that is step
+1:45:42 : nine now done so we've now gone and
+1:45:44 : defined our optimizer we've gone and
+1:45:46 : created our localization loss and
+1:45:48 : classification loss and we've also gone
+1:45:49 : and tested out those metrics now what we
+1:45:52 : need to do is actually train our neural
+1:45:53 : network but before we do that we
+1:45:55 : actually need to create a training
+1:45:56 : pipeline so for that we're going to
+1:45:59 : create this class over here let me zoom
+1:46:01 : out a bit so you can see it so what
+1:46:02 : we've got is the base model class so
+1:46:05 : we're creating a new class called face
+1:46:07 : tracker and to that we're passing
+1:46:08 : through model from
+1:46:11 : over here
+1:46:12 : and then let's actually take a look so
+1:46:14 : whenever you're creating the or of sub
+1:46:17 : classing the model class from keras
+1:46:20 : there's a couple of things that you need
+1:46:21 : to have so you need to have an init
+1:46:23 : method a compile method a train step
+1:46:25 : method and a call method so let me
+1:46:27 : explain what each of these does so the
+1:46:30 : net method is where you can pass through
+1:46:31 : your initial parameters so in this
+1:46:33 : particular case we're actually passing
+1:46:34 : through our pre-built neural network
+1:46:36 : which is the eye tracker model actually
+1:46:38 : shouldn't be eye tracker that's fine i
+1:46:40 : called it eye tracker previously it'll
+1:46:42 : still work um which is actually the face
+1:46:44 : tracker model from over here
+1:46:46 : so remember we instantiated face tracker
+1:46:47 : here it's a face tracker equals build
+1:46:49 : model which is creating an instance of
+1:46:52 : this deep learning model over here
+1:46:54 : then what we're doing is we're passing
+1:46:56 : that through to our init method i've
+1:46:58 : called it eye tracker it could be
+1:46:59 : anything but we're setting that equal to
+1:47:01 : self.model so self.model equals i
+1:47:04 : trackup
+1:47:05 : then we're compiling it so remember
+1:47:07 : whenever you build a keras neural
+1:47:08 : network you typically create the network
+1:47:10 : set self.compile and to your compile
+1:47:13 : method you pass through your loss and
+1:47:14 : your optimizer that's exactly what we're
+1:47:16 : doing here so def compile and then we're
+1:47:18 : passing through our optimizer our
+1:47:19 : classification loss and our localization
+1:47:21 : loss and we're setting those variables
+1:47:23 : over here as class variables so we're
+1:47:25 : able to or class attributes so we're
+1:47:27 : actually able to get those out
+1:47:28 : so before we're doing that though we're
+1:47:30 : running super dot compile so because
+1:47:32 : this is a subclass model we're compiling
+1:47:34 : this model as well we're then setting
+1:47:36 : all of these lost metrics of
+1:47:37 : self.classification loss equals class
+1:47:39 : loss from up here self dot localization
+1:47:42 : loss or ll loss equals localization loss
+1:47:44 : from up here self dot opt equals opt
+1:47:47 : from up here
+1:47:48 : then this is where the magic happens so
+1:47:50 : this uh train step is where a lot of the
+1:47:54 : hardcore stuff
+1:47:55 : actually happens and where we actually
+1:47:57 : train our neural network so let's get
+1:47:59 : ready to explain this so
+1:48:01 : train step is going to take in one batch
+1:48:02 : of data and it's going to train on that
+1:48:04 : batch of data so that's the first thing
+1:48:05 : to know so first thing we do is we get
+1:48:07 : that batch of data and we unpack it into
+1:48:09 : its x and y values
+1:48:12 : what we then do is we then start or we
+1:48:14 : then tell new keras to actually start
+1:48:16 : calculating each of the different
+1:48:18 : functions which are being applied to
+1:48:20 : this information as we go and train our
+1:48:22 : model or as we go and do stuff within
+1:48:24 : our model
+1:48:25 : so what we do is we first up make a
+1:48:27 : prediction from our model so we run
+1:48:29 : self.model which remember is taking in
+1:48:32 : our face tracker model it says eye
+1:48:33 : tracker here but it's effectively taking
+1:48:34 : in our face tracker model
+1:48:36 : and we're passing through our x values
+1:48:38 : which remember are our pre-processed
+1:48:40 : images and we're setting training equals
+1:48:42 : to true because if we've got any
+1:48:43 : specific layers which
+1:48:45 : perform differently during training to
+1:48:47 : inference it's going to activate those
+1:48:49 : layers now
+1:48:51 : now remember our model returns our
+1:48:52 : classes and our coordinates so we can
+1:48:54 : then take those classes and coordinates
+1:48:56 : and pass them through their respective
+1:48:57 : loss functions so we get batch class
+1:49:00 : loss equals self self.c loss which is
+1:49:02 : really just our classification loss and
+1:49:04 : we're passing through our classification
+1:49:06 : values remember the ones or zeros and
+1:49:08 : we're passing through the true ones or
+1:49:10 : zeros which we're getting from over here
+1:49:12 : now we're passing through the predicted
+1:49:13 : ones or zeros so y zero is it going to
+1:49:16 : be y true classes is going to be y pred
+1:49:18 : so over here this is y true why bread
+1:49:21 : then our batch localization loss sorry
+1:49:23 : my my throat is uh dying over now let's
+1:49:26 : grab the glass of water
+1:49:30 : this is always the problem with these
+1:49:31 : huge tutorials by the end i'm like
+1:49:33 : absolutely dead all right batch
+1:49:35 : localization loss equals self.ll loss
+1:49:38 : and then to that we're passing through y
+1:49:40 : true and we're passing through our
+1:49:41 : coordinates now i noticed when i was
+1:49:43 : building this up that i had to cast the
+1:49:44 : value to be
+1:49:46 : a t of float32 so you can see that i'm
+1:49:48 : casting that value there just know it'll
+1:49:50 : work it's just something that i had to
+1:49:51 : do to get the loss function to work
+1:49:53 : appropriately so we've got batch class
+1:49:55 : loss batch localization loss we're then
+1:49:57 : going to add those together to get one
+1:49:59 : loss metric so total loss equals batch
+1:50:01 : underscore localization loss multiplied
+1:50:03 : by 50 percent of the class loss that's
+1:50:05 : just something that i chose you could
+1:50:07 : tweak that if you wanted to
+1:50:09 : but i found that tended to work and then
+1:50:10 : we're actually going to calculate the
+1:50:12 : gradients so this is really important
+1:50:13 : when you're using a custom training step
+1:50:16 : so you calculate the gradients and then
+1:50:17 : you use your optimizer to go and apply
+1:50:19 : them so with tf.gradient tape as tape so
+1:50:22 : this is actually starts calculating all
+1:50:24 : of the operations that are happening
+1:50:26 : inside of our neural network and then we
+1:50:27 : can actually use tape.gradient to
+1:50:30 : actually go and get each one of those
+1:50:33 : gradients or calculate those gradients
+1:50:35 : so grad equals tape.gradient and then to
+1:50:37 : that we're going to pass through total
+1:50:38 : loss so we're actually calculating the
+1:50:40 : gradients with respect to our loss
+1:50:42 : function
+1:50:43 : and then we're calcul passing that
+1:50:44 : through to
+1:50:45 : self.model.trainablevariable so what
+1:50:47 : you'll actually get out of this is all
+1:50:48 : of the gradients for each one of those
+1:50:50 : variables with respect to that loss
+1:50:51 : function and then we go and do gradient
+1:50:53 : descent so optimizer dot apply gradients
+1:50:56 : and what we're going to do is loop
+1:50:58 : through each one of these gradients and
+1:50:59 : apply a or apply one step of gradient
+1:51:02 : descent so effectively we should be
+1:51:04 : optimizing closer towards minimizing
+1:51:06 : that loss so zip grad and then to that
+1:51:09 : we're going to pass through each one of
+1:51:10 : the trainable variables so self.model
+1:51:12 : dot my head blocking that it is
+1:51:15 : self.model.trainablevariables so i
+1:51:17 : wanted to explain this in a little bit
+1:51:18 : more detail right so because this is
+1:51:20 : really important so train step is
+1:51:22 : effectively going to give you that or
+1:51:24 : perform that training so remember train
+1:51:26 : step is going to be what actually trains
+1:51:27 : our neural network and if you think
+1:51:29 : about it there's a couple of key steps
+1:51:31 : so first off you trigger that monitoring
+1:51:32 : so tensorflow is going to start
+1:51:34 : calculating all the operations you make
+1:51:36 : a prediction you calculate the loss you
+1:51:38 : then go and calculate the gradients and
+1:51:40 : then you go and apply back props and
+1:51:41 : apply gradient descent against all of
+1:51:44 : those different variables
+1:51:45 : so that in a nutshell is what's
+1:51:47 : happening there and the reason that we
+1:51:48 : had to do this is because remember we've
+1:51:50 : effectively got two prediction heads
+1:51:51 : we've got classification and we've got
+1:51:53 : our uh regression model which gives us
+1:51:55 : our bounding box coordinates and then
+1:51:56 : what we're doing is we're returning
+1:51:58 : those losses
+1:51:59 : so returning total loss batch class loss
+1:52:01 : and batch regress loss and so what we'll
+1:52:03 : actually get back is a dictionary so
+1:52:05 : when we go and run our training step we
+1:52:06 : can see the progress
+1:52:08 : now our test step actually allows us to
+1:52:10 : you is actually triggered whenever we
+1:52:12 : pass through a validation data set and
+1:52:14 : this is almost identical to our train
+1:52:16 : step the only difference is that we're
+1:52:18 : not actually going applying back prop
+1:52:20 : here we're just going and calculating
+1:52:22 : our total loss batch class loss and
+1:52:24 : batch regress loss over there so if you
+1:52:26 : look at this versus this that the core
+1:52:29 : difference is that we don't have the
+1:52:30 : tf.gradient step tracking and we don't
+1:52:32 : actually have these two lines here which
+1:52:34 : are actually going and calculating the
+1:52:36 : gradients and doing backprop so
+1:52:38 : it just still gives you the ability to
+1:52:40 : go and validate your model and then
+1:52:42 : we've got def dot core i don't think
+1:52:43 : we're actually going to use this but if
+1:52:44 : ever you wanted to use dot predict for a
+1:52:46 : model you need to implement def.call
+1:52:48 : okay so that is our training step now
+1:52:51 : created so we can actually go and run
+1:52:54 : that and again all this code's going to
+1:52:55 : be available by github so if you want to
+1:52:57 : go into it into a ton more detail if
+1:52:59 : you've got questions you want to ask me
+1:53:00 : hit me up in the comments below
+1:53:02 : when i my voice is back uh okay so let's
+1:53:05 : zoom back in so that's our neural
+1:53:07 : network now defined right now training
+1:53:09 : step now defined so what we now need to
+1:53:11 : do is just set it up so we're going to
+1:53:13 : subclass our model so model equals face
+1:53:15 : tracker which is this subclass over here
+1:53:18 : and then through that we're going to be
+1:53:19 : passing through the neural network that
+1:53:21 : we set up just before which had our vgg
+1:53:23 : layer so which had this over here this
+1:53:26 : could be named anything it could be
+1:53:28 : named custom model blah blah blah
+1:53:29 : whatever you wanted or od model for
+1:53:31 : example and then all you do is you'd
+1:53:33 : pass through
+1:53:35 : od model or face tracker model eye
+1:53:37 : tracker model whatever you wanted to
+1:53:38 : over here so just know that the model at
+1:53:40 : the top maps into this model over here
+1:53:42 : to give us our custom training step so
+1:53:44 : we've just gone and created that
+1:53:46 : we can then go and compile it into our
+1:53:48 : compiler we have not instantiated our
+1:53:50 : optimizer so let's go up to here my
+1:53:52 : mouse has just died
+1:53:56 : there we go we're back okay
+1:54:00 : so let's go back up to here we didn't
+1:54:01 : actually run our optimizer so we need to
+1:54:03 : run that cell
+1:54:05 : and then if we go back down here when we
+1:54:07 : go and compile we are going to be
+1:54:08 : passing through our optimizer our class
+1:54:11 : loss and our regression loss if we go
+1:54:12 : and run that that has gone and compiled
+1:54:15 : successfully then we can train okay so
+1:54:17 : we're going to specify a log directory
+1:54:19 : and this is where our tensorboard model
+1:54:20 : will log out to so if i go and run that
+1:54:23 : and then i go and run this line this
+1:54:25 : actually creates a tensorboard callback
+1:54:26 : so if you wanted to go and review your
+1:54:28 : model performance after you've actually
+1:54:30 : gone and trained you'll actually be able
+1:54:32 : to go into here it'll create a
+1:54:34 : tensorboard
+1:54:35 : log directory which you can pick up and
+1:54:37 : go and review if you want more details
+1:54:38 : on that hit me up in the comments below
+1:54:41 : okay but for now this is the magic line
+1:54:43 : so
+1:54:44 : let's take a look
+1:54:46 : so model.fit is going to call this model
+1:54:48 : over here and it's going to remember fit
+1:54:50 : is going to trigger our train step and
+1:54:53 : if we're going to pass through
+1:54:54 : validation data it's going to trigger
+1:54:55 : our test step so hist equals model dot
+1:54:58 : fit and then to that we're passing
+1:55:00 : through our training data and if you
+1:55:02 : wanted to pass through a smaller amount
+1:55:03 : of data you can type in take to grab a
+1:55:05 : smaller batch we're going to pass
+1:55:06 : through everything so we'll get rid of
+1:55:08 : that we're going to specify how long we
+1:55:10 : want to train for so epochs equals 40.
+1:55:12 : so this means we're going to train for
+1:55:13 : 40 epochs and then we're going to
+1:55:15 : specify our validation data oops sorry
+1:55:18 : we'll get jumping over onto my trackpad
+1:55:20 : which is kicking off um weird stuff
+1:55:22 : happening so let's uh we zoomed out
+1:55:27 : let's zoom up all right cool that's
+1:55:28 : looking good all right so uh what are we
+1:55:30 : doing so we're gonna then pass through
+1:55:31 : validation data which is going to be our
+1:55:32 : validation partition which we set up
+1:55:34 : right up at the start and then we're
+1:55:36 : going to specify our callbacks equals to
+1:55:38 : this tensorboard callback which again is
+1:55:40 : purely optional but i just do it just
+1:55:42 : back up if ever i wanted to come back
+1:55:43 : and take a look at my training data now
+1:55:45 : because we've specified that we're going
+1:55:46 : to save this model to a variable called
+1:55:49 : hist this means it will actually be able
+1:55:51 : to get our training history so when we
+1:55:52 : go and run the fit model and assign the
+1:55:54 : outputs of that to a variable we're
+1:55:56 : actually able to get our history back
+1:55:58 : which is right what we'll do down here
+1:56:00 : we'll actually plot out our performance
+1:56:03 : okay that is our fit model so assuming
+1:56:06 : we've gone and done everything
+1:56:07 : successfully if we go and run this line
+1:56:09 : now we should kick off training so let's
+1:56:11 : run this and see how we go
+1:56:13 : and we've got errors
+1:56:16 : uh batch regress loss is not defined so
+1:56:18 : what have we done there so batch regress
+1:56:20 : loss have we not gone and
+1:56:23 : this should be
+1:56:25 : a batch localization it really should be
+1:56:27 : localization loss not regress loss
+1:56:31 : i think where is it failing let's just
+1:56:33 : quickly double check looks like we've
+1:56:34 : got a bug there
+1:56:38 : so it's failing in train step
+1:56:43 : do we have regress last year so self.lls
+1:56:49 : oh it's in here so this should be so
+1:56:51 : batch localization loss should be that
+1:56:53 : there
+1:56:55 : that should be that updated there and
+1:56:57 : this should be that there
+1:57:00 : looks like we had a couple of bugs there
+1:57:03 : the batch localization loss batch
+1:57:05 : localization loss it looks like we just
+1:57:07 : didn't update this training step
+1:57:11 : okay let's try that again
+1:57:16 : press our fingers
+1:57:22 : okay so we're training so you can see
+1:57:24 : that our model is running through all of
+1:57:26 : the different batches inside of our
+1:57:28 : training epoch so you can see it's 465.
+1:57:31 : that's our total loss that's our
+1:57:33 : classification loss and that is our
+1:57:34 : regression loss or effectively what our
+1:57:36 : bounding box regression loss model looks
+1:57:38 : like now ideally you want to see a
+1:57:40 : smooth reduction in all of those loss
+1:57:42 : metrics and you ideally want us don't
+1:57:44 : look looks like there's a massive
+1:57:46 : disparity between our regression
+1:57:48 : validation regression loss and our base
+1:57:50 : regression loss so again it might be an
+1:57:52 : indication well we've got a lot of data
+1:57:54 : so it might make sense and our
+1:57:55 : validation partition's pretty small but
+1:57:57 : i don't know
+1:57:58 : let's wait for this to finish training
+1:58:00 : and then we'll actually be able to see
+1:58:01 : how this is performing let's give it a
+1:58:03 : couple of epochs and see
+1:58:05 : okay that looks a little bit more
+1:58:06 : reasonable so our regression loss is
+1:58:08 : pretty close to our valve regression
+1:58:09 : loss
+1:58:11 : actually let me explain this so this is
+1:58:12 : our total loss metric and that's going
+1:58:14 : to be remember our batch localization
+1:58:16 : loss plus our batch class loss
+1:58:18 : multiplied by 0.5 and then we've got our
+1:58:21 : val
+1:58:22 : metrics as well
+1:58:24 : sorry i'm losing my voice now so this is
+1:58:25 : val total loss over here
+1:58:28 : let me zoom out actually zoom in
+1:58:32 : alright that's a bit easier so total
+1:58:33 : loss class loss regression loss and then
+1:58:35 : we've got where they're prefixed with
+1:58:37 : val that's what we've gone and done on
+1:58:38 : our validation partition so vowel total
+1:58:41 : loss valid class loss value regression
+1:58:42 : loss so what you want to see is that all
+1:58:45 : of these metrics reduce progressively
+1:58:48 : and pretty consistently with each other
+1:58:50 : so you don't want to see vowel
+1:58:51 : regression loss dump massively or spike
+1:58:54 : massively likewise you don't want to see
+1:58:56 : classification loss dump massively or
+1:58:57 : spike massively you all want them to be
+1:59:00 : reducing pretty consistently so you can
+1:59:02 : see that um let's take a look so our
+1:59:04 : vowel regression loss is 0.543 uh val
+1:59:08 : well sorry our base regression loss is
+1:59:10 : 0.543
+1:59:11 : our vowel regression loss is
+1:59:14 : 0.0166 so that's looking okay ideally
+1:59:16 : you don't wanna see one drop way too
+1:59:18 : much more than the other you don't wanna
+1:59:20 : see um stuff just going crazy so
+1:59:23 : what we'll do is we're gonna review this
+1:59:24 : in a lot more detail once we go and plot
+1:59:26 : our performance down here inside of 10.3
+1:59:29 : so let's let that finish training and
+1:59:31 : then i'll be able to walk you through
+1:59:32 : what that's looking like so we're up to
+1:59:34 : epoch 6 now total loss is at
+1:59:37 : 0.0394 so that value that you can see
+1:59:40 : there
+1:59:40 : and let me zoom in so you can see this
+1:59:43 : so total loss is that value there
+1:59:46 : and val total loss is that value there
+1:59:48 : so we've got a little bit of a
+1:59:50 : discrepancy or it's not discrepancy this
+1:59:52 : is part of training so 0.0394 and 0.0713
+1:59:56 : now if we break that down classification
+1:59:58 : loss on the training partition is 0.0148
+2:00:02 : valve class classification loss is 0.038
+2:00:05 : so that must mean the regression loss is
+2:00:08 : diverging so if we go and take a look
+2:00:10 : val regression loss is 0.0695
+2:00:14 : and on the training partition it's
+2:00:16 : 0.0321
+2:00:17 : so let's keep watching this
+2:00:20 : and see how we go
+2:00:24 : it looks like valve regression loss is
+2:00:26 : bumping up a little bit
+2:00:33 : okay that looks a little bit more
+2:00:34 : consistent so vowel regress is 0.018
+2:00:38 : train regress will be 0.0117
+2:00:40 : [Music]
+2:00:43 : so ideally you want them to both be
+2:00:44 : decreasing at a consistent rate you
+2:00:46 : might get spikes occasionally but it
+2:00:47 : shouldn't spike massively and then stay
+2:00:49 : massively out of whack
+2:00:52 : all right so let's let that train and
+2:00:53 : then we'll be right back and we'll be
+2:00:55 : able to see how this is actually
+2:00:56 : performed so
+2:00:57 : again we're training we're going we're
+2:00:59 : getting stuff done all right so that is
+2:01:01 : our deep neural network that is finished
+2:01:04 : training now
+2:01:06 : it'll be interesting to see what
+2:01:07 : performance looks like because i saw
+2:01:09 : validation regression loss bouncing up
+2:01:11 : and down but we shall soon see
+2:01:13 : so at least the nice thing that we can
+2:01:15 : do is we can at least go to history and
+2:01:17 : type in dot history
+2:01:20 : and we can actually get all of our lost
+2:01:21 : metrics and see how this was actually
+2:01:23 : performing so
+2:01:25 : training performance looks like it was
+2:01:26 : reducing pretty consistently but i think
+2:01:28 : we had
+2:01:29 : some or at least from the validation
+2:01:32 : partition we had a little bit of
+2:01:33 : bouncing up and down that now this might
+2:01:35 : be caused by a whole bunch of things
+2:01:37 : because you can see you've got a spike
+2:01:39 : there possibly there's some weird data
+2:01:41 : some weird annotations or some crappy
+2:01:42 : annotations i don't know we'll actually
+2:01:44 : find out soon so if we actually go and
+2:01:46 : visualize this performance we can
+2:01:48 : actually go i've got the exact same
+2:01:50 : thing written there
+2:01:51 : we can actually take a look at
+2:01:52 : his.history to get that history back and
+2:01:54 : that's because we've gone and saved
+2:01:56 : model.fit to the variable history so
+2:01:58 : that actually allows us to get that
+2:01:59 : performance but rather than look at it
+2:02:01 : like this it's probably easier to
+2:02:02 : actually plot it out let me zoom in
+2:02:05 : we're a bit too zoomed in there so if we
+2:02:07 : actually go and plot this so this loss
+2:02:09 : will actually plot the total loss the
+2:02:11 : validation loss or the total loss the
+2:02:13 : validation total loss the classification
+2:02:15 : loss the validation classification loss
+2:02:18 : the regression loss and the validation
+2:02:21 : regression loss where i'm really losing
+2:02:22 : my voice so if we go and run this let's
+2:02:24 : actually take a look see so you can see
+2:02:26 : regression loss was bouncing up and down
+2:02:28 : now this is a little bit concerning but
+2:02:30 : maybe we've got some weird data in that
+2:02:32 : validation partition who knows so you
+2:02:34 : can see classification loss performed
+2:02:36 : pretty perfectly but it looks like we
+2:02:38 : had some weird stuff happening in the
+2:02:40 : validation partition
+2:02:42 : possibly i'm thinking maybe there was
+2:02:44 : some weird annotations or something
+2:02:45 : let's actually go and take a look what's
+2:02:47 : our validation data look like
+2:02:50 : um so we're going to take a look at our
+2:02:52 : images
+2:02:54 : i don't know maybe it threw up on this
+2:02:55 : or like it wasn't too happy with this
+2:02:57 : particular image here
+2:02:59 : let's actually test it out i mean let's
+2:03:01 : jump back on over to our client and
+2:03:02 : we'll actually be able to see what this
+2:03:04 : performance looks like to begin with
+2:03:09 : all right final stage making predictions
+2:03:13 : you got it we're going to do this on our
+2:03:14 : test set but also in real time to
+2:03:16 : evaluate performance nice let's wrap
+2:03:18 : this up alrighty so we're in the end
+2:03:20 : game now so i'm making some predictions
+2:03:22 : so first things first let's go and make
+2:03:23 : some predictions on our test set so to
+2:03:25 : do this we can write test underscore
+2:03:27 : data equals test dot has numpy iterator
+2:03:29 : so this will set up an iterator we've
+2:03:31 : seen this a bunch of times we can then
+2:03:33 : go and grab the next batch so test the
+2:03:34 : underscore sample equals test underscore
+2:03:36 : data.next so this is just going to grab
+2:03:38 : one batch of data and remember it's
+2:03:40 : going to be eight examples and then we
+2:03:42 : can go and run a prediction so we can
+2:03:44 : use our face tracker model so face
+2:03:45 : tracker dot predict and we can pass
+2:03:47 : through the test sample now remember we
+2:03:49 : just want the x values not the labels so
+2:03:52 : we can actually type in y x
+2:03:54 : y equals testdata.next and just pass
+2:03:57 : through x here right it'll do the exact
+2:03:59 : same thing
+2:04:04 : now we can take a look at these
+2:04:06 : predictions using this plot so this is
+2:04:08 : actually going to predict or only plot
+2:04:10 : it out if the classification loss is
+2:04:12 : over 0.5 and if it is then it will
+2:04:15 : actually go and draw the rectangle now
+2:04:16 : this is exactly the same as the way that
+2:04:18 : we drew the
+2:04:20 : annotations towards the start after we'd
+2:04:22 : done the augmentation but let's actually
+2:04:24 : take a look
+2:04:25 : okay so this is performing absolutely
+2:04:27 : terribly so something's gone terribly
+2:04:29 : wrong so you can see there that we are
+2:04:31 : not picking up our faces whatsoever
+2:04:40 : so this is a problem
+2:04:47 : now i'm wondering if whether or not we
+2:04:50 : changed that final output layer or that
+2:04:53 : final connection
+2:04:55 : over here had an issue so we had this
+2:04:57 : set to f
+2:04:59 : and we had what did we have so we had
+2:05:01 : this connection set to hook into f2 over
+2:05:04 : here but previously when i tested it out
+2:05:07 : f1 had seemed to work i wonder if
+2:05:10 : changing that
+2:05:12 : had influenced the model
+2:05:17 : let's actually quickly double check our
+2:05:18 : annotations first so if we go and grab
+2:05:20 : something out of the let's keep going
+2:05:23 : through and take a look at our training
+2:05:24 : sample so
+2:05:26 : if we notice that we've got weird images
+2:05:28 : here i'm wondering whether or not it's
+2:05:30 : the architecture so if we go and run
+2:05:31 : that that looks okay
+2:05:34 : that looks okay that looks okay
+2:05:37 : oh we need to get the next one
+2:05:39 : those annotations look fine
+2:05:42 : they look fine
+2:05:48 : let's just quickly take a look at uh we
+2:05:51 : don't have oh we've got the annotations
+2:05:53 : here
+2:05:54 : if we take the sample codes
+2:06:00 : uh no we want sample classes so um res
+2:06:04 : one comma zero
+2:06:09 : yeah so these all effectively are
+2:06:11 : labeled correctly so one one one one
+2:06:13 : that's fine
+2:06:15 : i really wonder if changing the
+2:06:16 : architecture here has screwed it up
+2:06:19 : because previously i must have gone and
+2:06:20 : trained it with f1 hooked in so this
+2:06:23 : particular dense layer connected
+2:06:24 : directly to the single global max
+2:06:27 : pooling layer
+2:06:28 : now let's see if changing this
+2:06:31 : improves our model so we could actually
+2:06:33 : get rid of this layer because f1
+2:06:36 : or this particular regress one layer is
+2:06:37 : hooked into f1 which is this over there
+2:06:39 : so we could actually take this out
+2:06:42 : and say it's almost like that
+2:06:45 : now i wonder if that gives the models
+2:06:47 : more connectivity
+2:06:58 : i don't know let's see so if we go and
+2:06:59 : run that we go and rebuild our model
+2:07:02 : we've got 16.8 mil params still fine
+2:07:07 : nothing else that we've changed kind of
+2:07:08 : weird that we're getting such bad
+2:07:09 : performance
+2:07:11 : learning rates fine
+2:07:14 : we've gone and done anything weird over
+2:07:16 : here so let's take a look at our loss
+2:07:18 : metrics again so batch localization loss
+2:07:21 : equals that which equals self dot
+2:07:24 : localization loss that's fine
+2:07:25 : classification loss and we're returning
+2:07:29 : total loss goes to there
+2:07:37 : probably good that you see me debugging
+2:07:38 : one of these because then you're like
+2:07:40 : well this is how to actually build these
+2:07:41 : up and
+2:07:43 : fix stuff when stuff goes wrong
+2:07:46 : so batch localization loss gets passed
+2:07:48 : to there that's okay
+2:07:52 : batch localization loss that's okay so
+2:07:54 : we're just double checking that the loss
+2:07:55 : metrics are assigned correctly let's go
+2:07:57 : and kick this off again
+2:07:59 : let's train for a little less now so
+2:08:01 : remember we had we only trained on 10 i
+2:08:02 : don't know maybe let's go and
+2:08:04 : train on a smaller batch and let's drop
+2:08:07 : the epochs to 10. let's see what happens
+2:08:09 : now
+2:08:15 : so this is obviously going to allow us
+2:08:16 : to train faster but it's not
+2:08:18 : capitalizing on all the data okay so
+2:08:19 : regression loss
+2:08:21 : 0.8246
+2:08:27 : only thing i'm thinking is that maybe
+2:08:28 : we've got bad data and stuff is getting
+2:08:30 : thrown out
+2:08:39 : okay so what do we have so regression
+2:08:41 : loss those are decreasing pretty
+2:08:43 : consistently vowel regression loss
+2:08:45 : that's okay
+2:08:48 : this is still decreasing in line but
+2:08:50 : it's bumped up now
+2:08:52 : weird
+2:08:57 : okay so i'm just double checking that
+2:08:59 : regression loss is decreasing in line
+2:09:01 : with
+2:09:02 : the
+2:09:03 : vowel regression loss is decreasing in
+2:09:05 : line with regression loss if it's not
+2:09:06 : then maybe we've got a problem
+2:09:08 : okay so that's
+2:09:10 : gone up again i wonder if we've got
+2:09:11 : issues
+2:09:16 : okay so this has gone down massively now
+2:09:20 : and regression loss has gone up
+2:09:22 : gone down gone down okay
+2:09:30 : it's gone down this has gone up
+2:09:33 : we've got issues i think
+2:09:41 : okay so they've kind of converged i
+2:09:44 : don't know let's take a look at our
+2:09:45 : history that's looking better
+2:09:49 : right so at least our classification
+2:09:51 : loss is dropping our regression loss is
+2:09:52 : dropping
+2:09:54 : what is what our predictions look like
+2:09:58 : okay so we're getting weird bounding
+2:09:59 : boxes over here why are we getting two
+2:10:01 : bounding boxes
+2:10:06 : okay this one at least looks okay let's
+2:10:08 : actually go and train
+2:10:10 : i wonder if there's weird data let's
+2:10:11 : give it more data and see if that throws
+2:10:13 : it out
+2:10:15 : actually let's train for longer to begin
+2:10:16 : with so let's go for i don't know 40
+2:10:19 : epochs
+2:10:25 : [Music]
+2:10:30 : [Music]
+2:10:35 : 0.01 0.04 i think something's going
+2:10:37 : wrong let's stop this hold on
+2:10:40 : let's go and plot this out again
+2:10:43 : uh this will be from the last set so
+2:10:44 : that's not relevant just yet
+2:10:49 : something's broken we shouldn't even be
+2:10:50 : rendering two boxes
+2:10:57 : go and get the next step of data
+2:11:00 : yeah something has clearly gone wrong
+2:11:02 : because we should we really just
+2:11:04 : shouldn't be rendering out two sets of
+2:11:06 : data
+2:11:09 : hold on test data what are we doing here
+2:11:13 : okay so then we need to render on
+2:11:17 : wait we change this this should be test
+2:11:19 : sample over here
+2:11:23 : and then let's pass through test sample
+2:11:25 : one zero
+2:11:33 : okay so maybe we want to screw it up the
+2:11:35 : rendering hold on so maybe we are
+2:11:36 : rendering okay
+2:11:40 : [Music]
+2:11:47 : okay so that's picking that up it's not
+2:11:48 : picking up anything there
+2:11:50 : it's and run through another sample
+2:11:53 : okay so maybe the model has been working
+2:11:55 : and we've just been rendering it
+2:11:57 : incorrectly i think that's what's
+2:11:58 : actually gone wrong because we went and
+2:11:59 : changed this to x y
+2:12:01 : let's just keep running through the rest
+2:12:03 : of the sample data so that looks okay
+2:12:05 : that looks okay
+2:12:10 : that looks okay that looks okay all
+2:12:12 : right so maybe we aren't so bad
+2:12:15 : okay
+2:12:17 : phew
+2:12:19 : i think the model maybe had been working
+2:12:21 : but we've gone and
+2:12:23 : screwed up the visualization
+2:12:26 : i need to validate this because i don't
+2:12:28 : want i'm not confident that we
+2:12:30 : needed to go and change this let's just
+2:12:33 : go put this back because i want to go
+2:12:34 : and test it out properly
+2:12:36 : so maybe it's the vis that we screwed up
+2:12:38 : and not necessarily the model itself so
+2:12:39 : let's go and set this equal to f2
+2:12:41 : cut this put that back there
+2:12:44 : i'll include the final code anyway and
+2:12:47 : the github repo so we went and
+2:12:48 : reconnected
+2:12:50 : this regression layer back to this f1
+2:12:52 : layer but i'm going to put it connect it
+2:12:54 : back to this global max pooling layer to
+2:12:56 : see if that was truly the issue or
+2:12:58 : whether or not we just screwed up the
+2:13:00 : visualization i've got a feeling it was
+2:13:02 : the latter
+2:13:04 : so let's go and redefine that we're
+2:13:05 : going to redefine our neural network
+2:13:09 : that's fine we're going to recompile
+2:13:11 : let's give it all of the data back
+2:13:13 : so we're just going to drop the dot take
+2:13:15 : and let's give it i don't know let's
+2:13:17 : let's train it for like 10 epochs we
+2:13:18 : won't wait that long
+2:13:21 : let's see what our history looks like
+2:13:22 : we'll be right back we'll see if that
+2:13:24 : was the bug a little longer than a few
+2:13:26 : minutes later okay so i've gone and
+2:13:29 : retrained it for the 10 epochs now again
+2:13:32 : we did have one big spike here for our
+2:13:35 : validation regression loss so if we go
+2:13:37 : and take a look at our history again
+2:13:39 : and our plot so you can definitely see
+2:13:41 : that there was a massive spike but all
+2:13:44 : in all it doesn't look too bad so it
+2:13:46 : looks like we've kind of been kind of
+2:13:48 : steady in terms of regression loss and
+2:13:50 : validation regression loss but we do
+2:13:52 : have that big spike which is a little
+2:13:53 : bit concerning but we can go and take a
+2:13:54 : look at that data now so all we've gone
+2:13:57 : and done is we've just i think we went
+2:13:59 : and screwed up the visualization here
+2:14:00 : because we had x y which meant that we
+2:14:02 : didn't actually go and update when we
+2:14:04 : went and rendered the image over here
+2:14:06 : which would be sample image so this
+2:14:08 : really should have been um extracting
+2:14:10 : the sample image here so my screw up
+2:14:12 : might have actually gone and messed up
+2:14:14 : the code here so if we just go and leave
+2:14:15 : this as test sample
+2:14:17 : let's go and take a look okay that is
+2:14:19 : predicting faces accurately there there
+2:14:22 : it's blocked out our face there let's go
+2:14:23 : and make some other predictions
+2:14:26 : we might be okay guys let's go and print
+2:14:28 : this out
+2:14:30 : so that sort of reassures the fact that
+2:14:32 : it wasn't the neural network
+2:14:34 : architecture which was
+2:14:35 : out over
+2:14:38 : here it might have just been the fact
+2:14:39 : that we screwed up the visualization i
+2:14:41 : screwed up the visual
+2:14:43 : i'll take full uh responsibility we've
+2:14:45 : gone i went and screwed it up but that's
+2:14:46 : fine at least it you can see what
+2:14:48 : happens when you're building these types
+2:14:49 : of models okay so we've gone and
+2:14:51 : successfully classified our bounding
+2:14:53 : boxes let's go and take a look at some
+2:14:54 : other examples it's looking good guys
+2:14:58 : it's looking okay
+2:15:01 : and right we can if let's say for
+2:15:02 : example you wanted to increase the
+2:15:04 : confidence of a face being in the scene
+2:15:05 : you could actually increase this value
+2:15:07 : here so set it to 0.9 still looks like
+2:15:10 : we're picking up faces right so the
+2:15:11 : classifier is really really good in this
+2:15:13 : as well
+2:15:14 : but it looks like it's not classifying
+2:15:15 : our face when we cover our face so we're
+2:15:17 : looking okay
+2:15:18 : so predictions look look alright so
+2:15:20 : again
+2:15:21 : if you do notice these spikes i mean a
+2:15:23 : one-off spike every now and then isn't
+2:15:25 : the the worst-case scenario because keep
+2:15:27 : in mind we do have less data in our
+2:15:28 : validation partition versus our training
+2:15:30 : partition so it may be more successful
+2:15:32 : to changes in the weights but
+2:15:35 : if you start getting massive amounts of
+2:15:36 : variability or you just start to see
+2:15:38 : them completely diverging then you know
+2:15:40 : that you've probably got an overfitting
+2:15:41 : error um but in this case only
+2:15:43 : retraining like we went and retrained
+2:15:45 : for 10 epochs and that seemed to be okay
+2:15:48 : the real test will be when we actually
+2:15:50 : go and test this with the real-time
+2:15:51 : detection but for now let's actually go
+2:15:53 : and save this model so i'm going to
+2:15:55 : import the load model method so from
+2:15:57 : tensorflow.cariston models import load
+2:15:59 : model
+2:16:00 : and then we can go and save the face
+2:16:02 : tracker model so facetracker.save and
+2:16:04 : we're going to save it to facetracker.h5
+2:16:07 : so you can see that we should now have a
+2:16:09 : in a second
+2:16:11 : we've got a
+2:16:12 : facetracker.h5 file so let me zoom in so
+2:16:14 : you can see it
+2:16:16 : you can see that we've now got that
+2:16:17 : there and if we go and reload it we
+2:16:19 : should be good so if you wanted to go
+2:16:21 : and reload it into a different app
+2:16:22 : that's how you'd be doing it down here
+2:16:24 : now we can go and try this out on
+2:16:26 : real-time face detection so
+2:16:29 : okay
+2:16:30 : what we're doing here is we are
+2:16:32 : effectively capturing our video frame
+2:16:33 : we're then cutting it down to be 450 by
+2:16:36 : 450 pixels because that's our augmented
+2:16:39 : size we convert it from bgr to rgb
+2:16:42 : because opencv reads it in as bgr we
+2:16:44 : need it to be rgb for tensorflow we then
+2:16:47 : resize it to be 120 by 120 pixels and
+2:16:49 : divided by 255 to scale it down and then
+2:16:52 : we passed it to our face tracker.predict
+2:16:54 : method and then all this down here is
+2:16:56 : really just about rendering so
+2:16:58 : if you wanted to increase the rectangle
+2:17:00 : size or color it's really just a matter
+2:17:02 : of changing these over here so this is
+2:17:04 : going this over here controls
+2:17:06 : controls the main rectangle
+2:17:10 : this over here
+2:17:15 : the um the what's called the label
+2:17:18 : rectangle
+2:17:20 : i know i always get questions on like
+2:17:22 : how do i increase font size this over
+2:17:24 : here is
+2:17:25 : controls
+2:17:27 : the text rendered
+2:17:29 : so if you wanted to go and change the
+2:17:31 : font uh face it'll be this if you wanted
+2:17:33 : to change the font color it'll be this
+2:17:35 : thing font size font width um the
+2:17:38 : positioning is controlled by this tuple
+2:17:39 : over here
+2:17:40 : let's go and test this out so i'm very
+2:17:42 : curious to see how this performs in real
+2:17:44 : time so let's drop this
+2:17:47 : and i've closed a lot of the blinds in
+2:17:49 : the apartment so it might be a little
+2:17:50 : bit dark in the background i don't know
+2:17:52 : we'll see how it performs but if i go
+2:17:54 : and run this now we should get a pop-up
+2:18:01 : okay so what's happened so we are not
+2:18:03 : picking up our video capture device
+2:18:05 : that's because we need to change this to
+2:18:06 : be all right let me explain this so you
+2:18:08 : can see it says type nun type object is
+2:18:10 : non-subscriptable that is because it's
+2:18:12 : probably not able to actually get
+2:18:15 : a capture from our video camera now keep
+2:18:17 : in mind when we initially captured our
+2:18:19 : frames it was from up here and we had
+2:18:22 : our video capture device set to one so
+2:18:23 : we've got to change that down there as
+2:18:25 : well to make sure we're pulling from the
+2:18:26 : same camera both times so if i change
+2:18:28 : this to one
+2:18:30 : you need if you get that type of error
+2:18:31 : just double check that you're picking up
+2:18:32 : the right video camera as well just key
+2:18:34 : thing to keep in mind
+2:18:36 : we're running this this is the final
+2:18:37 : test the final countdown
+2:18:41 : see if this works
+2:18:43 : oh my gosh guys take a look at that
+2:18:46 : we built it
+2:18:48 : it's picking up my face
+2:18:56 : so this is a custom object detection
+2:18:58 : model working completely from scratch
+2:19:01 : guys i know this took a while to get to
+2:19:03 : and it was a really long tutorial but
+2:19:06 : that's what's possible so we went and
+2:19:07 : built it completely from scratch using
+2:19:09 : tensorflow and object detect let's cover
+2:19:10 : our face see if it's
+2:19:12 : this uh takes it away
+2:19:14 : take a look at that so it's no longer
+2:19:16 : picking up our face face
+2:19:18 : face face you could use this just for
+2:19:21 : about anything right but like if you
+2:19:22 : wanted to go and i don't know do a
+2:19:25 : number plate detection or if you wanted
+2:19:27 : to i don't know capture different cars
+2:19:29 : you could do that but like this is so
+2:19:30 : powerful this is just the beginning but
+2:19:33 : it at least shows you
+2:19:35 : where i would have reeled a real time
+2:19:37 : object detection model and one that
+2:19:38 : works on custom data sets using deep
+2:19:41 : learning and completely from scratch now
+2:19:42 : let me take down or open up the blinds
+2:19:45 : to see if it works under different
+2:19:46 : conditions right what about if we turned
+2:19:47 : off the recording lights
+2:19:50 : still picking up my face guys look how
+2:19:52 : dark i am in the
+2:19:54 : how good is that though it's still
+2:19:56 : working pretty resilient
+2:20:02 : back on
+2:20:03 : so even with really bright like i mean
+2:20:05 : this has got auto focus on on the camera
+2:20:07 : over here or auto brightness so you can
+2:20:09 : see it's gone a little bit crazy but
+2:20:11 : take a look at that guys picking up a
+2:20:13 : face if i go
+2:20:14 : down disappears
+2:20:21 : i can't get over this how awesome is
+2:20:23 : that so i mean we had a little bit of
+2:20:24 : trouble with the rendering but apart
+2:20:25 : from that it wasn't too bad to actually
+2:20:27 : get to this a lot of pre-processing but
+2:20:29 : that sort of comes with the uh with the
+2:20:32 : territory when you're doing deep
+2:20:33 : learning
+2:20:38 : how awesome is that guys a real-time
+2:20:40 : face detection model working pretty well
+2:20:43 : i do say so myself again you could add
+2:20:46 : more data so in the end let's quickly go
+2:20:48 : through what went wrong there because i
+2:20:49 : think that's important let's do a quick
+2:20:51 : uh what do you call it
+2:20:53 : postmortem
+2:21:00 : i've just opened up the blinds as well
+2:21:01 : just to see what it works on like what
+2:21:03 : it looks like under different lighting
+2:21:04 : conditions
+2:21:05 : i think it still works okay guys like
+2:21:07 : that's tracking my face pretty well and
+2:21:09 : it's pretty quick like
+2:21:12 : just
+2:21:13 : it's working
+2:21:15 : you can move the mic it works oh my god
+2:21:18 : this is so good like i've wanted to do
+2:21:19 : this ever since i started deep learning
+2:21:21 : i'm so happy how good is that oh
+2:21:24 : i'm going to be playing with this all
+2:21:26 : night who knows what i'll be building
+2:21:29 : all right oh it even works with the
+2:21:31 : green screen guys
+2:21:33 : oh come on
+2:21:35 : as if that's not awesome
+2:21:39 : keep in mind we didn't even give it any
+2:21:40 : green screen samples so it's still able
+2:21:42 : to pick up our face pretty well
+2:21:46 : that is nuts
+2:21:48 : okay post-mortem though so what actually
+2:21:50 : went wrong here so i think
+2:21:53 : i'm keeping this up here just to
+2:21:55 : reiterate how awesome i think this is so
+2:21:58 : uh what went wrong so the key i think
+2:22:00 : the model itself trained okay so when we
+2:22:02 : were actually training this we were
+2:22:03 : perfectly fine it's just that when we
+2:22:05 : went and visualized it that screwing up
+2:22:08 : this so if i went and go wrote x y
+2:22:12 : what clicked for me is when it started
+2:22:14 : rendering multiple boxes this is a
+2:22:16 : single object detection model so we
+2:22:18 : start to see multiple boxes something
+2:22:19 : has either gone wrong with the
+2:22:20 : predictions or something has gone wrong
+2:22:22 : with the rendering so if i go and do
+2:22:24 : this right we're going to start to see
+2:22:26 : multiple boxes or duplicate boxes oh
+2:22:28 : this code is still running we've got to
+2:22:30 : stop this code in order for this run so
+2:22:31 : i'm just going to hit q now
+2:22:32 : [Music]
+2:22:33 : all right so we're going to run it once
+2:22:35 : now if i go and do it again
+2:22:40 : uh let's get another sample
+2:22:44 : another sample
+2:22:47 : it's not happening i would it's gotta be
+2:22:49 : if something weird's gone wrong
+2:22:52 : oh no it's because we had x here hold on
+2:22:57 : there we go all right so the fact that
+2:23:00 : we're getting multiple boxes so you can
+2:23:01 : see that one there that's a dead
+2:23:03 : giveaway that something has gone
+2:23:04 : horribly wrong so you can see that that
+2:23:06 : indicates that something has gone really
+2:23:08 : really bad but it's typically going to
+2:23:10 : be something to do with the actual
+2:23:12 : architecture or it's going to be
+2:23:13 : something to do with the rendering so
+2:23:15 : either the machine learning model the
+2:23:17 : deep learning model is outputting
+2:23:18 : incorrectly or we're now rendering
+2:23:20 : incorrectly you can see here as soon as
+2:23:22 : we unscrew this so we're going to reset
+2:23:24 : it back to test sample
+2:23:28 : and test sample
+2:23:30 : 0
+2:23:32 : let's go back
+2:23:34 : boom it's working again
+2:23:36 : so we didn't need to go and change the
+2:23:38 : deep learning architecture we didn't
+2:23:39 : need to go and move around those layers
+2:23:41 : um i think it's okay guys this is
+2:23:43 : working pretty well let's go and test it
+2:23:44 : once more so if we go and run our
+2:23:46 : real-time detection test
+2:23:56 : so if you get that little pop-up and it
+2:23:57 : closes just re-run it again sometimes it
+2:23:59 : has to reset the video capture
+2:24:05 : take a look guys face
+2:24:07 : oh my god i'm so happy this is
+2:24:10 : absolutely amazing
+2:24:12 : that brings this tutorial to it then i
+2:24:13 : know it's been a long one but we've gone
+2:24:15 : through an absolute ton of stuff and the
+2:24:18 : final code including all the things that
+2:24:20 : i tweaked inside of this tutorial are
+2:24:21 : going to be available on github i'll
+2:24:23 : make sure to update it right after this
+2:24:24 : so you got it
+2:24:25 : but that is it in a nutshell we've gone
+2:24:27 : and effectively built our own object
+2:24:29 : detection model that does face detection
+2:24:31 : hopefully you've enjoyed this let's
+2:24:32 : quickly recap what we did in that last
+2:24:34 : segment so we went and built our deep
+2:24:35 : neural network we realized that it
+2:24:37 : wasn't an issue with the neural network
+2:24:39 : itself but i showed you how to go and
+2:24:40 : double check that so if you wanted to go
+2:24:42 : and change layers you can move them
+2:24:43 : around they've got to be the same shape
+2:24:45 : in terms of the output or linear
+2:24:48 : algebra
+2:24:49 : rules applied
+2:24:51 : we then went and made some real-time
+2:24:52 : detections we defined our localization
+2:24:54 : loss we defined our training steps i
+2:24:56 : explained the custom training step that
+2:24:58 : we went and did as well as training how
+2:25:00 : to go on debug what to look for when
+2:25:02 : you're training so again big spikes one
+2:25:04 : off might be okay if you got start to
+2:25:06 : see huge amounts of divergence you've
+2:25:08 : got to go and double check your data see
+2:25:10 : whether or not you need to apply
+2:25:11 : regularization whether or not it's a a
+2:25:13 : complete architectural redesign but in
+2:25:15 : our particular case what do we end up
+2:25:16 : with so
+2:25:18 : our final validation regression loss was
+2:25:20 : 0.025
+2:25:22 : our total loss overall was
+2:25:24 : 0.065 our total uh validation loss was
+2:25:28 : 0.0297 but in all in all it seems to be
+2:25:30 : working pretty well again we could add
+2:25:32 : more data we could um do a whole bunch
+2:25:34 : of additional things but on that note
+2:25:36 : that about does wrap this up do check
+2:25:38 : the github for the updated code thanks
+2:25:40 : again for tuning in guys peace thanks so
+2:25:42 : much for tuning in guys hopefully you
+2:25:43 : enjoyed this video if you did be sure to
+2:25:44 : give it a big thumbs up hit subscribe
+2:25:46 : and click that bell and let me know how
+2:25:48 : you went with this i did put in a ton of
+2:25:50 : effort to be able to build up this full
+2:25:51 : flow ideally from scratch and really
+2:25:54 : with minimal dependency so let me know
+2:25:55 : how you went with it thanks again for
+2:25:56 : tuning in peace
+2:25:58 : [Music]
